@@ -1,3 +1,5 @@
+*.so
+*.csproj
 # Object files
 *.o
 *.ko
@@ -16,7 +18,6 @@
 
 # Shared objects (inc. Windows DLLs)
 *.dll
-*.so
 *.so.*
 *.dylib
 
