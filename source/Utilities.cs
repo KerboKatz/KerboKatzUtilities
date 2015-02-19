@@ -186,10 +186,11 @@ namespace KerboKatz
     }
 
     #endregion lockEditor https://github.com/CYBUTEK/Engineer/blob/master/Engineer/BuildEngineer.cs CheckEditorLock
-    public static void getVesselCostAndStages(ConfigNode[] partList, out int vesselStages, out float vesselCost)
+    public static void getVesselCostAndStages(ConfigNode[] partList, out int vesselStages, out float vesselCost, out bool completeVessel)
     {
       vesselCost = 0;
       vesselStages = 0;
+      completeVessel = true;
       foreach (ConfigNode part in partList)
       {
         if (part.HasValue("istg"))
@@ -198,20 +199,47 @@ namespace KerboKatz
           if (partStage > vesselStages)
             vesselStages = partStage;
         }
-        vesselCost += getPartCost(part);
+        float partCost = 0;
+        if (getPartCost(part, out partCost))
+        {
+          vesselCost += partCost;
+        }
+        else
+        {
+          completeVessel = false;
+        }
       }
     }
 
-    private static float getPartCost(ConfigNode part, bool includeFuel = true)
+    private static bool getPartCost(ConfigNode part, out float total, bool includeFuel = true)
     {
       string name = getPartName(part);
       float dryCost, fuelCost;
+      total = 0;
+      var aP = getAvailablePart(name);
+      if (aP == null)
+      {
+        return false;
+      }
+      total = ShipConstruction.GetPartCosts(part, getAvailablePart(name), out dryCost, out fuelCost);
+      if (includeFuel)
+        return true;
+      else
+        total = dryCost;
+      return true;
+    }
+      /*string name = getPartName(part);
+      float dryCost, fuelCost;
+      var aP = getAvailablePart(name);
+      if (aP == null)
+      {
+        return;
+      }
       float total = ShipConstruction.GetPartCosts(part, getAvailablePart(name), out dryCost, out fuelCost);
       if (includeFuel)
         return total;
       else
-        return dryCost;
-    }
+        return dryCost;*/
 
     private static string getPartName(ConfigNode part)
     {
@@ -312,6 +340,17 @@ namespace KerboKatz
     public T5 Item5 { get; set; }
   }
 
+  public class Tuple<T1, T2, T3, T4, T5, T6> : Tuple<T1, T2, T3, T4, T5>
+  {
+    public Tuple(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6)
+      : base(item1, item2, item3, item4, item5)
+    {
+      Item6 = item6;
+    }
+
+    public T6 Item6 { get; set; }
+  }
+
   public static class Tuple
   {
     public static Tuple<T1> Create<T1>(T1 item1)
@@ -337,6 +376,10 @@ namespace KerboKatz
     public static Tuple<T1, T2, T3, T4, T5> Create<T1, T2, T3, T4, T5>(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5)
     {
       return new Tuple<T1, T2, T3, T4, T5>(item1, item2, item3, item4, item5);
+    }
+    public static Tuple<T1, T2, T3, T4, T5, T6> Create<T1, T2, T3, T4, T5, T6>(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6)
+    {
+      return new Tuple<T1, T2, T3, T4, T5, T6>(item1, item2, item3, item4, item5, item6);
     }
   }
 
