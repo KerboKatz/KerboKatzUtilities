@@ -1,3 +1,5 @@
+v 1.0.2
+ * Changed some method and variable names to be inline with CraftHistory
 v 1.0.1
  * Added checks for missing parts
 v 1.0.0

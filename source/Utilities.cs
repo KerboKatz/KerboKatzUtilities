@@ -186,27 +186,27 @@ namespace KerboKatz
     }
 
     #endregion lockEditor https://github.com/CYBUTEK/Engineer/blob/master/Engineer/BuildEngineer.cs CheckEditorLock
-    public static void getVesselCostAndStages(ConfigNode[] partList, out int vesselStages, out float vesselCost, out bool completeVessel)
+    public static void getCraftCostAndStages(ConfigNode[] partList, out int craftStages, out float craftCost, out bool completeCraft)
     {
-      vesselCost = 0;
-      vesselStages = 0;
-      completeVessel = true;
+      craftCost = 0;
+      craftStages = 0;
+      completeCraft = true;
       foreach (ConfigNode part in partList)
       {
         if (part.HasValue("istg"))
         {
           var partStage = toInt(part.GetValue("istg"));
-          if (partStage > vesselStages)
-            vesselStages = partStage;
+          if (partStage > craftStages)
+            craftStages = partStage;
         }
         float partCost = 0;
         if (getPartCost(part, out partCost))
         {
-          vesselCost += partCost;
+          craftCost += partCost;
         }
         else
         {
-          completeVessel = false;
+          completeCraft = false;
         }
       }
     }
@@ -228,18 +228,6 @@ namespace KerboKatz
         total = dryCost;
       return true;
     }
-      /*string name = getPartName(part);
-      float dryCost, fuelCost;
-      var aP = getAvailablePart(name);
-      if (aP == null)
-      {
-        return;
-      }
-      float total = ShipConstruction.GetPartCosts(part, getAvailablePart(name), out dryCost, out fuelCost);
-      if (includeFuel)
-        return total;
-      else
-        return dryCost;*/
 
     private static string getPartName(ConfigNode part)
     {
@@ -377,6 +365,7 @@ namespace KerboKatz
     {
       return new Tuple<T1, T2, T3, T4, T5>(item1, item2, item3, item4, item5);
     }
+
     public static Tuple<T1, T2, T3, T4, T5, T6> Create<T1, T2, T3, T4, T5, T6>(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6)
     {
       return new Tuple<T1, T2, T3, T4, T5, T6>(item1, item2, item3, item4, item5, item6);
