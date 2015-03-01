@@ -45,7 +45,10 @@ namespace KerboKatz
     public static void debug(string mod, string message, params string[] strings)//thanks Sephiroth018 for this part
     {
       //#if DEBUG
-      Debug.Log(string.Format("[" + mod + "] " + message, strings));
+      if (strings.Length > 0)
+        message = string.Format(message, strings);
+      Debug.Log("[" + mod + "] " + message);
+
       //#endif
     }
 
@@ -107,7 +110,22 @@ namespace KerboKatz
       return str;
     }
 
-    #endregion stringmethods
+    #region http://stackoverflow.com/a/444818
+    public static bool Contains(this string source, string toCheck, StringComparison comp = StringComparison.OrdinalIgnoreCase)
+    {
+      return source.IndexOf(toCheck, comp) >= 0;
+    }
+
+    #endregion http://stackoverflow.com/a/444818
+    #region http://stackoverflow.com/a/6535516
+    public static bool IsNullOrWhiteSpace(this string value)
+    {
+      if (value == null) return true;
+      return string.IsNullOrEmpty(value.Trim());
+    }
+
+    #endregion http://stackoverflow.com/a/6535516
+
     #region uimethods
     public static void clampToScreen(ref Rect rect)
     {
@@ -157,17 +175,16 @@ namespace KerboKatz
     #region timemethods
     public static double getUnixTimestamp()
     {
-      return (DateTime.Now - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds;
+      return (DateTime.Now - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Local)).TotalSeconds;
     }
 
     public static DateTime convertUnixTimestampToDate(double unixTimestamp)
     {
-      return new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds(unixTimestamp).ToLocalTime();
+      return new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Local).AddSeconds(unixTimestamp).ToLocalTime();
       ;
     }
 
     #endregion timemethods
-    #region lockEditor https://github.com/CYBUTEK/Engineer/blob/master/Engineer/BuildEngineer.cs CheckEditorLock
     /**
      * taken and modified from https://github.com/CYBUTEK/Engineer/blob/master/Engineer/BuildEngineer.cs CheckEditorLock
      */
@@ -179,18 +196,44 @@ namespace KerboKatz
       {
         EditorLogic.fetch.Lock(true, true, true, id);
       }
-      else //if (!window.Contains(mousePos))
+      else
       {
         EditorLogic.fetch.Unlock(id);
       }
     }
 
-    #endregion lockEditor https://github.com/CYBUTEK/Engineer/blob/master/Engineer/BuildEngineer.cs CheckEditorLock
-    public static void getCraftCostAndStages(ConfigNode[] partList, out int craftStages, out float craftCost, out bool completeCraft)
+    #endregion stringmethods
+    public static string[] getCraftCategories(string file)
+    {
+      return ConfigNode.Load(file).GetValues("category");
+    }
+
+    public static string getPartAndStageString(int count, string p, bool zeroNumber = true)
+    {
+      if (count > 1)
+      {
+        return count + " " + p + "s";
+      }
+      else if (count == 1)
+      {
+        return "1 " + p;
+      }
+      else if (count == 0 && zeroNumber)
+      {
+        return "0 " + p + "s";
+      }
+      else
+      {
+        return "No " + p + "s";
+      }
+    }
+
+    public static void getCraftCostAndStages(ConfigNode nodes, ConfigNode[] partList, out int craftStages, out float craftCost, out bool completeCraft, out string[] craftCategories)
     {
       craftCost = 0;
       craftStages = 0;
       completeCraft = true;
+      craftCategories = nodes.GetValues("category");
       foreach (ConfigNode part in partList)
       {
         if (part.HasValue("istg"))
@@ -339,6 +382,39 @@ namespace KerboKatz
     public T6 Item6 { get; set; }
   }
 
+  public class Tuple<T1, T2, T3, T4, T5, T6, T7> : Tuple<T1, T2, T3, T4, T5, T6>
+  {
+    public Tuple(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6, T7 item7)
+      : base(item1, item2, item3, item4, item5, item6)
+    {
+      Item7 = item7;
+    }
+
+    public T7 Item7 { get; set; }
+  }
+
+  public class Tuple<T1, T2, T3, T4, T5, T6, T7, T8> : Tuple<T1, T2, T3, T4, T5, T6, T7>
+  {
+    public Tuple(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6, T7 item7, T8 item8)
+      : base(item1, item2, item3, item4, item5, item6, item7)
+    {
+      Item8 = item8;
+    }
+
+    public T8 Item8 { get; set; }
+  }
+
+  public class Tuple<T1, T2, T3, T4, T5, T6, T7, T8, T9> : Tuple<T1, T2, T3, T4, T5, T6, T7, T8>
+  {
+    public Tuple(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6, T7 item7, T8 item8, T9 item9)
+      : base(item1, item2, item3, item4, item5, item6, item7, item8)
+    {
+      Item9 = item9;
+    }
+
+    public T9 Item9 { get; set; }
+  }
+
   public static class Tuple
   {
     public static Tuple<T1> Create<T1>(T1 item1)
@@ -369,6 +445,21 @@ namespace KerboKatz
     public static Tuple<T1, T2, T3, T4, T5, T6> Create<T1, T2, T3, T4, T5, T6>(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6)
     {
       return new Tuple<T1, T2, T3, T4, T5, T6>(item1, item2, item3, item4, item5, item6);
+    }
+
+    public static Tuple<T1, T2, T3, T4, T5, T6, T7> Create<T1, T2, T3, T4, T5, T6, T7>(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6, T7 item7)
+    {
+      return new Tuple<T1, T2, T3, T4, T5, T6, T7>(item1, item2, item3, item4, item5, item6, item7);
+    }
+
+    public static Tuple<T1, T2, T3, T4, T5, T6, T7, T8> Create<T1, T2, T3, T4, T5, T6, T7, T8>(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6, T7 item7, T8 item8)
+    {
+      return new Tuple<T1, T2, T3, T4, T5, T6, T7, T8>(item1, item2, item3, item4, item5, item6, item7, item8);
+    }
+
+    public static Tuple<T1, T2, T3, T4, T5, T6, T7, T8, T9> Create<T1, T2, T3, T4, T5, T6, T7, T8, T9>(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6, T7 item7, T8 item8, T9 item9)
+    {
+      return new Tuple<T1, T2, T3, T4, T5, T6, T7, T8, T9>(item1, item2, item3, item4, item5, item6, item7, item8, item9);
     }
   }
 
