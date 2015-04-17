@@ -1,3 +1,8 @@
+v 1.0.4
+ * Added KerboKatzBase
+ * Added Int setting methods
+ * Added alot of UI related methods
+ * Checking AssemblyFileVersion instead of AssemblyVersion
 v 1.0.3
  * Minor changes
 v 1.0.2

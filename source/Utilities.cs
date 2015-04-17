@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using UnityEngine;
@@ -13,7 +15,10 @@ namespace KerboKatz
     public static Version getUtilitiesVersion()
     {
       if (utilitiesVersion == null)
-        utilitiesVersion = Assembly.GetExecutingAssembly().GetName().Version;
+      {
+        utilitiesVersion = new Version(FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion);
+        debug("KerboKatzUtilities", "Version:" + utilitiesVersion);
+      }
       return utilitiesVersion;
     }
 
@@ -47,7 +52,7 @@ namespace KerboKatz
       //#if DEBUG
       if (strings.Length > 0)
         message = string.Format(message, strings);
-      Debug.Log("[" + mod + "] " + message);
+      UnityEngine.Debug.Log("[" + mod + "] " + message);
 
       //#endif
     }
@@ -88,6 +93,13 @@ namespace KerboKatz
       return n;
     }
 
+    public static float toFloat(double nDouble)
+    {
+      float n = 0;
+      float.TryParse(nDouble.ToString(), out n);
+      return n;
+    }
+
     public static int toInt(string nString)
     {
       int n = 0;
@@ -110,6 +122,7 @@ namespace KerboKatz
       return str;
     }
 
+    #endregion stringmethods
     #region http://stackoverflow.com/a/444818
     public static bool Contains(this string source, string toCheck, StringComparison comp = StringComparison.OrdinalIgnoreCase)
     {
@@ -127,6 +140,22 @@ namespace KerboKatz
     #endregion http://stackoverflow.com/a/6535516
 
     #region uimethods
+    public static void createWindow(bool showWindow, int windowID, ref Rect windowRect, GUI.WindowFunction windowFunction, string windowName, GUIStyle windowStyle, bool lockEditorUI = false)
+    {
+      if (showWindow)
+      {
+        windowRect = GUILayout.Window(windowID, windowRect, windowFunction, windowName, windowStyle);
+        clampToScreen(ref windowRect);
+        if (lockEditorUI)
+          lockEditor(windowRect, windowID.ToString());
+      }
+      else
+      {
+        if (lockEditorUI)
+          EditorLogic.fetch.Unlock(windowID.ToString());
+      }
+    }
+
     public static void clampToScreen(ref Rect rect)
     {
       rect.x = Mathf.Clamp(rect.x, 0, Screen.width - rect.width);
@@ -171,6 +200,139 @@ namespace KerboKatz
       return createButton(label, style, tooltip, disable);
     }
 
+    public static bool createToggle(string label, bool toggle, GUIStyle style, string tooltip = "", bool disable = false)
+    {
+      bool disableR = GUI.enabled;
+      if (disable)
+      {
+        GUI.enabled = false;
+      }
+      var rToggle = GUILayout.Toggle(toggle, new GUIContent(label, tooltip), style);
+      GUI.enabled = disableR;
+      return rToggle;
+    }
+
+    public static void createOptionSwitcher(string optionName, List<string> options, ref int optionSelected, GUIStyle labelStyle, GUIStyle optionStyle, GUIStyle prevButtonStyle, GUIStyle nextButtonStyle, string tooltip = "")
+    {
+      string prev, next;
+      if (prevButtonStyle == nextButtonStyle)
+      {
+        prev = "◀";
+        next = "▶";
+      }
+      else
+      {
+        prev = "";
+        next = "";
+      }
+      GUILayout.BeginHorizontal();
+      createLabel(optionName, labelStyle, tooltip);
+      if (GUILayout.Button(prev, prevButtonStyle))
+      {
+        optionSelected--;
+        if (optionSelected < 0)
+        {
+          optionSelected = options.Count - 1;
+        }
+      }
+      createLabel(options[optionSelected], optionStyle);
+      if (GUILayout.Button(next, nextButtonStyle))
+      {
+        optionSelected++;
+        if (optionSelected >= options.Count)
+        {
+          optionSelected = 0;
+        }
+      }
+      GUILayout.EndHorizontal();
+    }
+
+    private static GUIStyle tooltipStyle;
+    private static Rect tooltipRect = new Rect();
+    private static string CurrentTooltip;
+    public static void updateTooltipAndDrag(GUIStyle style = null)
+    {
+      if (style == null)
+      {
+        style = getTooltipStyle();
+      }
+      GUI.DragWindow();
+      if (CurrentTooltip != GUI.tooltip)
+      {
+        CurrentTooltip = GUI.tooltip;
+        var guiContent = new GUIContent(CurrentTooltip);
+        var tooltipSize = style.CalcSize(guiContent);
+        tooltipRect.x = Input.mousePosition.x + 10;
+        tooltipRect.y = Screen.height - Input.mousePosition.y + 10;
+        if (tooltipSize.x < 200)
+          tooltipRect.width = tooltipSize.x;
+        else
+          tooltipRect.width = 200;
+        tooltipRect.height = style.CalcHeight(guiContent, 200);
+        Utilities.clampToScreen(ref tooltipRect);
+      }
+    }
+
+    public static GUIStyle getTooltipStyle(GUIStyle style = null)
+    {
+      if (tooltipStyle == null)
+        initStyle();
+      return tooltipStyle;
+    }
+
+    private static void initStyle()
+    {
+      tooltipStyle                   = new GUIStyle(HighLogic.Skin.label);
+      tooltipStyle.fixedWidth        = 0;
+      tooltipStyle.padding.top       = 5;
+      tooltipStyle.padding.left      = 5;
+      tooltipStyle.padding.right     = 5;
+      tooltipStyle.padding.bottom    = 5;
+      tooltipStyle.fontSize          = 10;
+      tooltipStyle.normal.background = getTexture("tooltipBG", "Textures");
+      tooltipStyle.normal.textColor  = Color.white;
+      tooltipStyle.border.top        = 1;
+      tooltipStyle.border.bottom     = 1;
+      tooltipStyle.border.left       = 8;
+      tooltipStyle.border.right      = 8;
+      tooltipStyle.stretchHeight     = true;
+      //return tooltipStyle;
+    }
+
+    public static void showTooltip()
+    {
+      if (!String.IsNullOrEmpty(CurrentTooltip))
+      {
+        GUI.Label(tooltipRect, CurrentTooltip, tooltipStyle);
+        GUI.depth = 0;
+      }
+    }
+
+    private static GUISkin guiSkin;
+    public static Vector2 beginScrollView(Vector2 scrollPosition, float width, float height, bool alwaysShowHorizontal = false, bool alwaysShowVertical = false, GUIStyle styleHorizontal = null, GUIStyle styleVertical = null, GUIStyle scrollView = null)
+    {
+      if (guiSkin == null)
+      {
+        guiSkin = GUI.skin;
+      }
+      if (scrollView == null)
+      {
+        scrollView = GUI.skin.scrollView;
+      }
+      if (styleHorizontal == null)
+      {
+        styleHorizontal = GUI.skin.horizontalScrollbar;
+      }
+      if (styleVertical == null)
+      {
+        styleVertical = GUI.skin.verticalScrollbar;
+      }
+      GUI.skin = HighLogic.Skin;
+      scrollPosition = GUILayout.BeginScrollView(scrollPosition, alwaysShowHorizontal, alwaysShowVertical, styleHorizontal, styleVertical, scrollView, GUILayout.Width(width), GUILayout.Height(height));//420
+      GUI.skin = guiSkin;
+      return scrollPosition;
+    }
+
     #endregion uimethods
     #region timemethods
     public static double getUnixTimestamp()
@@ -202,7 +364,6 @@ namespace KerboKatz
       }
     }
 
-    #endregion stringmethods
     public static string[] getCraftCategories(string file)
     {
       return ConfigNode.Load(file).GetValues("category");
@@ -265,9 +426,7 @@ namespace KerboKatz
         return false;
       }
       total = ShipConstruction.GetPartCosts(part, getAvailablePart(name), out dryCost, out fuelCost);
-      if (includeFuel)
-        return true;
-      else
+      if (!includeFuel)
         total = dryCost;
       return true;
     }
@@ -300,6 +459,22 @@ namespace KerboKatz
       return null;
     }
 
+    public static float getScienceValue(Dictionary<string, int> experimentCount, ScienceExperiment experiment, ScienceSubject currentScienceSubject)
+    {
+      float currentScienceValue;
+      if (experimentCount.ContainsKey(currentScienceSubject.id))
+      {
+        currentScienceValue = ResearchAndDevelopment.GetNextScienceValue(experiment.baseValue * experiment.dataScale, currentScienceSubject) * HighLogic.CurrentGame.Parameters.Career.ScienceGainMultiplier;
+        if (experimentCount[currentScienceSubject.id] >= 2)//taken from scienceAlert to get somewhat accurate science values after the second experiment
+          currentScienceValue = currentScienceValue / Mathf.Pow(4f, experimentCount[currentScienceSubject.id] - 2);
+      }
+      else
+      {
+        currentScienceValue = ResearchAndDevelopment.GetScienceValue(experiment.baseValue * experiment.dataScale, currentScienceSubject) * HighLogic.CurrentGame.Parameters.Career.ScienceGainMultiplier;
+      }
+      return currentScienceValue;
+    }
+
     public static Texture2D getTexture(string file, string path, bool asNormal = false)
     {
       return GameDatabase.Instance.GetTexture("KerboKatz/" + path + "/" + file, asNormal);
@@ -309,6 +484,12 @@ namespace KerboKatz
     {
       Array.Reverse(arrayToReverse);
       return arrayToReverse;
+    }
+
+    //http://stackoverflow.com/a/972323
+    public static IEnumerable<T> GetValues<T>()
+    {
+      return Enum.GetValues(typeof(T)).Cast<T>();
     }
   }
 

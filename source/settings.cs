@@ -149,6 +149,42 @@ namespace KerboKatz
       }
     }
 
+    #endregion add, modify and get float    
+    #region add, modify and get int
+    /**
+     * methods to add modify and get string double
+     */
+    public void add(string index, int value)
+    {
+      currentSettings.Add(index, value.ToString());
+    }
+
+    public void set(string index, int value)
+    {
+      if (currentSettings.ContainsKey(index))
+      {
+        currentSettings[index] = value.ToString();
+      }
+      else
+      {
+        add(index, value);
+      }
+    }
+
+    public int getInt(string index)
+    {
+      int result;
+      string resultString;
+      if (currentSettings.TryGetValue(index, out resultString) && int.TryParse(resultString, out result))
+      {
+        return result;
+      }
+      else
+      {
+        return 0;
+      }
+    }
+
     #endregion add, modify and get float
     #region add, modify and get bool
     /**
