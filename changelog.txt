@@ -1,3 +1,5 @@
+v 1.1.0
+ * Refractured alot of code (still backwards compatible to 1.0.4 marked as deprecated)
 v 1.0.4
  * Added KerboKatzBase
  * Added Int setting methods
