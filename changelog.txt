@@ -1,3 +1,7 @@
+v 1.2.1
+ * Fixed:
+  * Issues if only one of our mods is installed
+  * Exceptions thrown in ForScienceContinued due to not loading the styles
 v 1.2.0
  * Added:
   * KerboKatz toolbar for all our mods used by default. Can switch back to using stock in each mods settings.
