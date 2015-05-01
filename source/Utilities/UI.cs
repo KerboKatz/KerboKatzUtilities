@@ -95,6 +95,7 @@ namespace KerboKatz
 
       public static void createOptionSwitcher(string optionName, List<string> options, ref int optionSelected, GUIStyle labelStyle = null, GUIStyle optionStyle = null, GUIStyle prevButtonStyle = null, GUIStyle nextButtonStyle = null, string tooltip = "")
       {
+        getTooltipStyle();
         if (labelStyle == null)
         {
           labelStyle = sortTextStyle;

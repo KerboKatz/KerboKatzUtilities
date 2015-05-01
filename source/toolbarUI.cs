@@ -31,11 +31,11 @@ namespace KerboKatz
     {
       if (!initStyle)
         InitStyle();
-      Utilities.UI.createWindow((currentSettings.getBool("showSettings") && isAnyActive() && visibleInThisScene.Count > 1), toolbarWindowID, ref settingsWindowRect, settingsWindow, "KerboKatz Toolbar", toolbarWindowStyle);
+      Utilities.UI.createWindow((currentSettings.getBool("showToolbar") && isAnyActive() && visibleInThisScene.Count > 1), toolbarWindowID, ref settingsWindowRect, toolbarWindow, "KerboKatz Toolbar", toolbarWindowStyle);
       Utilities.UI.showTooltip();
     }
 
-    private void settingsWindow(int id)
+    private void toolbarWindow(int id)
     {
       GUILayout.BeginVertical();
       foreach (var currentMod in references.Values)

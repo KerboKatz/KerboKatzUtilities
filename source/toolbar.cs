@@ -11,7 +11,7 @@ namespace KerboKatz
     {
       modName = "KerboKatzToolbar";
       requiresUtilities = new Version(1, 2, 0);
-      useToolbar = false;
+      useToolbar = true;
     }
 
     protected override void Started()
@@ -22,6 +22,7 @@ namespace KerboKatz
     private static Dictionary<string, ToolbarClass> references = new Dictionary<string, ToolbarClass>();
     private List<ToolbarClass> visibleInThisScene = new List<ToolbarClass>();
     private static bool isUpdateRequired;
+    private bool updateSingleIcon;
 
     public static void add(ToolbarClass toAdd)
     {
@@ -88,12 +89,18 @@ namespace KerboKatz
           if (visibleInThisScene.Count == 1)
           {
             setIcon(visibleInThisScene[0].icon);
+            updateSingleIcon = true;
           }
           else
           {
             setIcon(Utilities.getTexture("KerboKatzToolbar", "Textures"));
+            updateSingleIcon = false;
           }
           settingsWindowRect.height = 0;
+        }
+        else
+        {
+          updateSingleIcon = false;
         }
         if (visibleInThisScene.Count == 0)
         {
@@ -105,6 +112,10 @@ namespace KerboKatz
           setAppLauncherScenes(ApplicationLauncher.AppScenes.ALWAYS);
         }
       }
+      if (updateSingleIcon)
+      {
+        setIcon(visibleInThisScene[0].icon);
+      }
     }
 
     protected override void onToolbar()
@@ -115,13 +126,13 @@ namespace KerboKatz
       }
       else
       {
-        if (currentSettings.getBool("showSettings"))
+        if (currentSettings.getBool("showToolbar"))
         {
-          currentSettings.set("showSettings", false);
+          currentSettings.set("showToolbar", false);
         }
         else
         {
-          currentSettings.set("showSettings", true);
+          currentSettings.set("showToolbar", true);
         }
       }
     }

@@ -151,6 +151,8 @@ namespace KerboKatz
 
     public void setIcon(Texture2D icon)
     {
+      if (this.icon == icon)
+        return;
       if (button != null)
       {
         button.SetTexture(icon);
