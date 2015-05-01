@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace KerboKatz
 {
@@ -105,22 +101,5 @@ namespace KerboKatz
         return ConfigNode.Load(file).GetValues("category");
       }
     }
-    #region deprecated
-    [Obsolete("Use Utilities.Craft instead")]
-    public static string[] getCraftCategories(string file)
-    {
-      return Craft.getCraftCategories(file);
-    }
-    [Obsolete("Use Utilities.Craft instead")]
-    public static string getPartAndStageString(int count, string p, bool zeroNumber = true)
-    {
-      return Craft.getPartAndStageString(count, p, zeroNumber);
-    }
-    [Obsolete("Use Utilities.Craft instead")]
-    public static void getCraftCostAndStages(ConfigNode nodes, ConfigNode[] partList, out int craftStages, out float craftCost, out bool completeCraft, out string[] craftCategories)
-    {
-      Craft.getCraftCostAndStages(nodes, partList, out craftStages, out craftCost, out completeCraft, out craftCategories);
-    }
-    #endregion
   }
 }

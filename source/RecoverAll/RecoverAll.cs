@@ -1,9 +1,7 @@
 ﻿using KerboKatz.Classes;
-using KerboKatz.ConfigNodeExtension;
+using KerboKatz.Extensions;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace KerboKatz
 {
@@ -12,19 +10,18 @@ namespace KerboKatz
     public static partial class RecoverAll
     {
       private static double maxKSCDistance;
-      public static void addVesselInfo(Vessel vessel,ref Dictionary<string, int> experimentCount, ref List<vesselInfo> vesselInfoList,bool destroyAll  = false)
+      public static void addVesselInfo(Vessel vessel, ref Dictionary<string, int> experimentCount, ref List<vesselInfo> vesselInfoList, bool destroyAll = false)
       {
         if (maxKSCDistance == 0)
           maxKSCDistance = SpaceCenter.Instance.cb.Radius * Math.PI;
         float totalCost = 0, totalScience = 0, partCost, science, crewCount = 0;
         float dryCost, fuelCost;
-        //var parts = new List<partInfo>();
-        var parts = new Dictionary<string,partInfo>();
+        var parts = new Dictionary<string, partInfo>();
         var scienceExperiments = new List<scienceInfo>();
         var crew = new List<ProtoCrewMember>();
-        var resourceInfo = new Dictionary<string,resourceInfo>();
-        float distanceModifier  = 1;
-        if(!destroyAll)
+        var resourceInfo = new Dictionary<string, resourceInfo>();
+        float distanceModifier = 1;
+        if (!destroyAll)
           distanceModifier = 1 - Utilities.toFloat(SpaceCenter.Instance.GreatCircleDistance(SpaceCenter.Instance.cb.GetRelSurfaceNVector(vessel.protoVessel.latitude, vessel.protoVessel.longitude)) / maxKSCDistance);
         foreach (var part in vessel.protoVessel.protoPartSnapshots)
         {
@@ -33,19 +30,20 @@ namespace KerboKatz
           if (parts.ContainsKey(identifier))
           {
             parts[identifier].amount++;
-          }else{
+          }
+          else
+          {
             parts.Add(identifier, new partInfo(part.partInfo.title, dryCost));
           }
           foreach (var resource in part.resources)
           {
             if (resourceInfo.ContainsKey(resource.resourceName))
             {
-              resourceInfo[resource.resourceName].amount += resource.resourceValues.getFloatValue("amount");//.GetValue("amount");//resource.resourceRef.amount;
+              resourceInfo[resource.resourceName].amount += resource.resourceValues.getFloatValue("amount");
             }
             else
             {
-              //resource.resourceValues.
-              resourceInfo.Add(resource.resourceName, new resourceInfo(resource.resourceName, PartResourceLibrary.Instance.GetDefinition(resource.resourceName).unitCost, resource.resourceValues.getFloatValue("amount")));//resource.resourceRef.amount));
+              resourceInfo.Add(resource.resourceName, new resourceInfo(resource.resourceName, PartResourceLibrary.Instance.GetDefinition(resource.resourceName).unitCost, resource.resourceValues.getFloatValue("amount")));
             }
           }
           foreach (ProtoPartModuleSnapshot partModule in part.modules)
@@ -71,15 +69,16 @@ namespace KerboKatz
           crewCount++;
         }
         List<alignedTooltip> tooltipList = new List<alignedTooltip>();
-        var currentVessel                = new vesselInfo(parts, resourceInfo, scienceExperiments, crew, new importantInfo(vessel, vessel.vesselName, totalCost, totalScience, crewCount, distanceModifier, true));
-        float maxSize                    = 0;
+        var currentVessel = new vesselInfo(parts, resourceInfo, scienceExperiments, crew, new importantInfo(vessel, vessel.vesselName, totalCost, totalScience, crewCount, distanceModifier, true));
+        float maxSize = 0;
         //creating the tooltips and caching them puts less strain on the gc on the cost of memory
         //but it would all sit in memory anyways so this seems to be the smart move :)
-        currentVessel.partTooltip        = Utilities.RecoverAll.createPartInfo(currentVessel, ref tooltipList, ref maxSize);
-        currentVessel.scienceTooltip     = Utilities.RecoverAll.createScienceInfo(currentVessel, ref tooltipList, ref maxSize);
-        currentVessel.crewTooltip        = Utilities.RecoverAll.createCrewString(currentVessel);
+        currentVessel.partTooltip = Utilities.RecoverAll.createPartInfo(currentVessel, ref tooltipList, ref maxSize);
+        currentVessel.scienceTooltip = Utilities.RecoverAll.createScienceInfo(currentVessel, ref tooltipList, ref maxSize);
+        currentVessel.crewTooltip = Utilities.RecoverAll.createCrewString(currentVessel);
         vesselInfoList.Add(currentVessel);
       }
+
       public static string createPartInfo(vesselInfo currentVessel, ref List<alignedTooltip> tooltipList, ref float maxSize)
       {
         foreach (var currentPart in currentVessel.partInfo.Values)

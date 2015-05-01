@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace KerboKatz.Classes
+﻿namespace KerboKatz.Classes
 {
   /**
    * Tuple class added from http://stackoverflow.com/a/7121489 since it doesnt exist in .net 3.5
@@ -154,5 +149,4 @@ namespace KerboKatz.Classes
       return new Tuple<T1, T2, T3, T4, T5, T6, T7, T8, T9>(item1, item2, item3, item4, item5, item6, item7, item8, item9);
     }
   }
-
 }

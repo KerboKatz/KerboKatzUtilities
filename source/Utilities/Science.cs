@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace KerboKatz
@@ -21,6 +18,7 @@ namespace KerboKatz
           experimentCount.Add(scienceSubject.id, 1);
         }
       }
+
       public static float getScienceValue(Dictionary<string, int> experimentCount, ScienceExperiment experiment, ScienceSubject currentScienceSubject)
       {
         float currentScienceValue;
@@ -28,7 +26,7 @@ namespace KerboKatz
         {
           currentScienceValue = ResearchAndDevelopment.GetNextScienceValue(experiment.baseValue * experiment.dataScale, currentScienceSubject) * HighLogic.CurrentGame.Parameters.Career.ScienceGainMultiplier;
           if (experimentCount[currentScienceSubject.id] >= 2)//taken from scienceAlert to get somewhat accurate science values after the second experiment
-            currentScienceValue = currentScienceValue / Mathf.Pow(4f, experimentCount[currentScienceSubject.id] - 2);
+            currentScienceValue = currentScienceValue / Mathf.Pow(4f, experimentCount[currentScienceSubject.id] - 1);
         }
         else
         {
@@ -37,12 +35,5 @@ namespace KerboKatz
         return currentScienceValue;
       }
     }
-    #region deprecated
-    [Obsolete("Use Utilities.Science instead")]
-    public static float getScienceValue(Dictionary<string, int> experimentCount, ScienceExperiment experiment, ScienceSubject currentScienceSubject)
-    {
-      return Science.getScienceValue(experimentCount, experiment, currentScienceSubject);
-    }
-    #endregion
   }
 }

@@ -6,7 +6,7 @@ namespace KerboKatz
 {
   public class settings
   {
-    private ConfigNode settingsContainer;// = new ConfigNode("KerboKatzSettings");
+    private ConfigNode settingsContainer;
     private Dictionary<string, string> currentSettings = new Dictionary<string, string>();
     private string settingsPath;
     private string settingsFile;
@@ -149,7 +149,7 @@ namespace KerboKatz
       }
     }
 
-    #endregion add, modify and get float    
+    #endregion add, modify and get float
     #region add, modify and get int
     /**
      * methods to add modify and get string double
@@ -185,7 +185,7 @@ namespace KerboKatz
       }
     }
 
-    #endregion add, modify and get float
+    #endregion add, modify and get int
     #region add, modify and get bool
     /**
      * methods to add modify and get bool values
@@ -231,7 +231,6 @@ namespace KerboKatz
       ConfigNode savenode = new ConfigNode();
       foreach (KeyValuePair<string, string> entry in currentSettings)
       {
-        //addValueToContainer(entry.Key, entry.Value);
         if (settingsContainer.HasValue(entry.Key))
         {
           settingsContainer.SetValue(entry.Key, entry.Value);

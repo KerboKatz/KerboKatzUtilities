@@ -1,9 +1,8 @@
-﻿using System;
+﻿using KerboKatz.Classes;
+using KerboKatz.Extensions;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityEngine;
-using KerboKatz.Classes;
 
 namespace KerboKatz
 {
@@ -11,27 +10,38 @@ namespace KerboKatz
   {
     public static partial class UI
     {
-      public static void createWindow(bool showWindow, int windowID, ref Rect windowRect, GUI.WindowFunction windowFunction, string windowName, GUIStyle windowStyle, bool lockEditorUI = false)
+      public static void createWindow(bool showWindow, int windowID, ref Rectangle windowRect, GUI.WindowFunction windowFunction, string windowName, GUIStyle windowStyle, bool lockEditorUI = false)
       {
+        bool containing = false;
         if (showWindow)
         {
-          windowRect = GUILayout.Window(windowID, windowRect, windowFunction, windowName, windowStyle);
-          clampToScreen(ref windowRect);
-          if (lockEditorUI)
-            lockEditor(windowRect, windowID.ToString());
+          windowRect.rect = GUILayout.Window(windowID, windowRect.rect, windowFunction, windowName, windowStyle);
+          windowRect.performUpdate();
+          windowRect.clampToScreen();
+          Vector2 mousePos = Input.mousePosition;
+          mousePos.y = Screen.height - mousePos.y;
+          containing = windowRect.rect.Contains(mousePos);
         }
-        else
+        if (containing)
         {
-          if (lockEditorUI)
-            EditorLogic.fetch.Unlock(windowID.ToString());
+          if (!windowRect.isLocking)
+          {
+            InputLockManager.SetControlLock(ControlTypes.All, windowName + windowID);
+            windowRect.isLocking = true;
+          }
+        }
+        else if (windowRect.isLocking)
+        {
+          InputLockManager.RemoveControlLock(windowName + windowID);
+          windowRect.isLocking = false;
         }
       }
-
-      public static void clampToScreen(ref Rect rect)
+      /*
+      private static void clampToScreen(ref Rect rect)
       {
         rect.x = Mathf.Clamp(rect.x, 0, Screen.width - rect.width);
         rect.y = Mathf.Clamp(rect.y, 0, Screen.height - rect.height);
-      }
+      }*/
 
       public static void createLabel(string label, GUIStyle style, string tooltip = "")
       {
@@ -83,8 +93,24 @@ namespace KerboKatz
         return rToggle;
       }
 
-      public static void createOptionSwitcher(string optionName, List<string> options, ref int optionSelected, GUIStyle labelStyle, GUIStyle optionStyle, GUIStyle prevButtonStyle, GUIStyle nextButtonStyle, string tooltip = "")
+      public static void createOptionSwitcher(string optionName, List<string> options, ref int optionSelected, GUIStyle labelStyle = null, GUIStyle optionStyle = null, GUIStyle prevButtonStyle = null, GUIStyle nextButtonStyle = null, string tooltip = "")
       {
+        if (labelStyle == null)
+        {
+          labelStyle = sortTextStyle;
+        }
+        if (optionStyle == null)
+        {
+          optionStyle = sortOptionTextStyle;
+        }
+        if (prevButtonStyle == null)
+        {
+          prevButtonStyle = sortButtonStyle;
+        }
+        if (nextButtonStyle == null)
+        {
+          nextButtonStyle = sortButtonStyle;
+        }
         string prev, next;
         if (prevButtonStyle == nextButtonStyle)
         {
@@ -119,38 +145,42 @@ namespace KerboKatz
       }
 
       private static GUIStyle tooltipStyle;
-      private static Rect tooltipRect = new Rect();
+      private static Rectangle tooltipRect = new Rectangle();
       private static string CurrentTooltip;
       private static float spaceSize;
+      public static GUIStyle sortButtonStyle;
+      public static GUIStyle sortTextStyle;
+      public static GUIStyle sortOptionTextStyle;
       public static void updateTooltipAndDrag(bool drag = true)
       {
         updateTooltipAndDrag(null, 200, drag);
       }
+
       public static void updateTooltipAndDrag()
       {
-        updateTooltipAndDrag(true);
+        updateTooltipAndDrag(null, 200, true);
       }
-      public static void updateTooltipAndDrag(GUIStyle style = null,float tooltipWidth = 200, bool drag = true)
+
+      public static void updateTooltipAndDrag(GUIStyle style = null, float tooltipWidth = 200, bool drag = true)
       {
-        if (style == null)
-        {
-          style = getTooltipStyle();
-        }
         if (drag)
           GUI.DragWindow();
         if (CurrentTooltip != GUI.tooltip)
         {
+          if (style == null)
+          {
+            style = getTooltipStyle();
+          }
           CurrentTooltip = GUI.tooltip;
           var guiContent = new GUIContent(CurrentTooltip);
           var tooltipSize = style.CalcSize(guiContent);
-          tooltipRect.x = Input.mousePosition.x + 10;
-          tooltipRect.y = Screen.height - Input.mousePosition.y + 10;
           if (tooltipSize.x < tooltipWidth)
             tooltipRect.width = tooltipSize.x;
           else
             tooltipRect.width = tooltipWidth;
           tooltipRect.height = style.CalcHeight(guiContent, tooltipRect.width);
-          clampToScreen(ref tooltipRect);
+          tooltipRect.moveToCursor(new Vector2(10, 10), Rectangle.defaultVector, true);
+          tooltipRect.clampToScreen();
         }
       }
 
@@ -163,6 +193,23 @@ namespace KerboKatz
 
       private static void initStyle()
       {
+        sortButtonStyle = new GUIStyle(GUI.skin.button);
+        sortButtonStyle.fixedWidth = 20;
+        sortButtonStyle.fixedHeight = 20;
+        sortButtonStyle.margin.top = 0;
+        sortButtonStyle.active = sortButtonStyle.hover;
+
+        sortTextStyle = new GUIStyle(HighLogic.Skin.label);
+        sortTextStyle.margin.top = 2;
+        sortTextStyle.padding.setToZero();
+        sortTextStyle.fixedWidth = 50;
+
+        sortOptionTextStyle = new GUIStyle(sortTextStyle);
+        sortOptionTextStyle.margin.left = 0;
+        sortOptionTextStyle.padding.left = 0;
+        sortOptionTextStyle.fixedWidth = 130;
+        sortOptionTextStyle.alignment = TextAnchor.MiddleCenter;
+
         tooltipStyle = new GUIStyle(HighLogic.Skin.label);
         tooltipStyle.fixedWidth = 0;
         tooltipStyle.padding.top = 5;
@@ -181,13 +228,12 @@ namespace KerboKatz
         tooltipStyle.padding.left = 0;
         tooltipStyle.padding.right = 0;
         spaceSize = tooltipStyle.CalcSize(new GUIContent("_ _")).x - (tooltipStyle.CalcSize(new GUIContent("_")).x * 2);
-          if (float.IsInfinity(spaceSize) || spaceSize <= 0)
-          {
-            spaceSize = 1;
-          }
-          tooltipStyle.padding.left = 5;
-          tooltipStyle.padding.right = 5;
-        //return tooltipStyle;
+        if (float.IsInfinity(spaceSize) || spaceSize <= 0)
+        {
+          spaceSize = 1;
+        }
+        tooltipStyle.padding.left = 5;
+        tooltipStyle.padding.right = 5;
       }
 
       public static void showTooltip(GUIStyle tooltipStyle = null)
@@ -196,18 +242,19 @@ namespace KerboKatz
         {
           if (tooltipStyle == null)
             tooltipStyle = getTooltipStyle();
-          GUI.Label(tooltipRect, CurrentTooltip, tooltipStyle);
-          GUI.depth = 0;
+
+          GUI.Window(1701999999, tooltipRect.rect, showTooltip, "", GUIStyle.none);
         }
       }
 
-      private static GUISkin guiSkin;
+      private static void showTooltip(int id)
+      {
+        GUI.Label(new Rect(0, 0, tooltipRect.width, tooltipRect.height), CurrentTooltip, tooltipStyle);
+        GUI.depth = 0;
+      }
+
       public static Vector2 beginScrollView(Vector2 scrollPosition, float width, float height, bool alwaysShowHorizontal = false, bool alwaysShowVertical = false, GUIStyle styleHorizontal = null, GUIStyle styleVertical = null, GUIStyle scrollView = null)
       {
-        if (guiSkin == null)
-        {
-          guiSkin = GUI.skin;
-        }
         if (scrollView == null)
         {
           scrollView = GUI.skin.scrollView;
@@ -222,7 +269,7 @@ namespace KerboKatz
         }
         GUI.skin = HighLogic.Skin;
         scrollPosition = GUILayout.BeginScrollView(scrollPosition, alwaysShowHorizontal, alwaysShowVertical, styleHorizontal, styleVertical, scrollView, GUILayout.Width(width), GUILayout.Height(height));//420
-        GUI.skin = guiSkin;
+        GUI.skin = null;
         return scrollPosition;
       }
 
@@ -241,7 +288,7 @@ namespace KerboKatz
         return maxSize;
       }
 
-      public static  string createAlignedOutString(List<alignedTooltip> alignedTooltipList, float maxSize)
+      public static string createAlignedOutString(List<alignedTooltip> alignedTooltipList, float maxSize)
       {
         string outString = "";
         foreach (var current in alignedTooltipList)
@@ -261,85 +308,43 @@ namespace KerboKatz
         }
         return outString;
       }
-    }
 
-    #region deprecated
-    [Obsolete("Use Utilities.UI instead")]
-    public static void createWindow(bool showWindow, int windowID, ref Rect windowRect, GUI.WindowFunction windowFunction, string windowName, GUIStyle windowStyle, bool lockEditorUI = false)
-    {
-      UI.createWindow(showWindow, windowID, ref windowRect, windowFunction, windowName, windowStyle, lockEditorUI);
-    }
+      public static float createSlider(string label, float current, float minValue, float maxValue, GUIStyle textStyle = null, GUIStyle numberFieldStyle = null, GUIStyle horizontalSlider = null, GUIStyle horizontalSliderThumb = null, string tooltip = "", float limitValue = 0)
+      {
+        if (textStyle == null)
+          textStyle = HighLogic.Skin.label;
+        if (horizontalSlider == null)
+          horizontalSlider = HighLogic.Skin.horizontalSlider;
+        if (horizontalSliderThumb == null)
+          horizontalSliderThumb = HighLogic.Skin.horizontalSliderThumb;
+        if (numberFieldStyle == null)
+          numberFieldStyle = HighLogic.Skin.textField;
 
-    [Obsolete("Use Utilities.UI instead")]
-    public static void clampToScreen(ref Rect rect)
-    {
-      UI.clampToScreen(ref rect);
+        Utilities.UI.createLabel(label, textStyle, tooltip);
+        GUILayout.BeginHorizontal();
+        GUILayout.BeginVertical();
+        current = Utilities.round(GUILayout.HorizontalSlider(current, minValue, maxValue, horizontalSlider, horizontalSliderThumb), 0);
+        GUILayout.EndVertical();
+        current = Utilities.round(Utilities.toFloat(Utilities.getOnlyNumbers(GUILayout.TextField(current.ToString(), numberFieldStyle))), 0);
+        if (limitValue == 0)
+        {
+          if (current > maxValue)
+          {
+            current = maxValue;
+          }
+        }
+        else
+        {
+          if (current > limitValue)
+          {
+            current = limitValue;
+          }
+        }
+        if (current < minValue)
+          current = minValue;
+        GUILayout.EndHorizontal();
+        return current;
+      }
     }
-
-    [Obsolete("Use Utilities.UI instead")]
-    public static void createLabel(string label, GUIStyle style, string tooltip = "")
-    {
-      UI.createLabel(label, style, tooltip);
-    }
-
-    [Obsolete("Use Utilities.UI instead")]
-    public static bool createButton(string label, GUIStyle style)
-    {
-      return UI.createButton(label,style);
-    }
-
-    [Obsolete("Use Utilities.UI instead")]
-    public static bool createButton(string label, GUIStyle style, string tooltip = "")
-    {
-      return UI.createButton( label,  style,  tooltip );
-    }
-
-    [Obsolete("Use Utilities.UI instead")]
-    public static bool createButton(string label, GUIStyle style, string tooltip = "", bool disable = false)
-    {
-      return UI.createButton(label, style, tooltip, disable);
-    }
-
-    [Obsolete("Use Utilities.UI instead")]
-    public static bool createButton(string label, GUIStyle style, bool disable = false, string tooltip = "")
-    {
-      return UI.createButton(label, style, tooltip, disable);
-    }
-
-    [Obsolete("Use Utilities.UI instead")]
-    public static bool createToggle(string label, bool toggle, GUIStyle style, string tooltip = "", bool disable = false)
-    {
-      return UI.createToggle( label,  toggle,  style,  tooltip ,  disable);
-    }
-
-    [Obsolete("Use Utilities.UI instead")]
-    public static void createOptionSwitcher(string optionName, List<string> options, ref int optionSelected, GUIStyle labelStyle, GUIStyle optionStyle, GUIStyle prevButtonStyle, GUIStyle nextButtonStyle, string tooltip = "")
-    {
-      UI.createOptionSwitcher(optionName, options, ref  optionSelected, labelStyle, optionStyle, prevButtonStyle, nextButtonStyle, tooltip);
-    }
-    [Obsolete("Use Utilities.UI instead")]
-    public static void updateTooltipAndDrag(GUIStyle style = null)
-    {
-      UI.updateTooltipAndDrag(style);
-    }
-
-    [Obsolete("Use Utilities.UI instead")]
-    public static GUIStyle getTooltipStyle(GUIStyle style = null)
-    {
-      return UI.getTooltipStyle();
-    }
-
-    [Obsolete("Use Utilities.UI instead")]
-    public static void showTooltip()
-    {
-      UI.showTooltip();
-    }
-
-    [Obsolete("Use Utilities.UI instead")]
-    public static Vector2 beginScrollView(Vector2 scrollPosition, float width, float height, bool alwaysShowHorizontal = false, bool alwaysShowVertical = false, GUIStyle styleHorizontal = null, GUIStyle styleVertical = null, GUIStyle scrollView = null)
-    {
-      return UI.beginScrollView(scrollPosition, width, height, alwaysShowHorizontal, alwaysShowVertical, styleHorizontal, styleVertical, scrollView);
-    }
-    #endregion
   }
 }

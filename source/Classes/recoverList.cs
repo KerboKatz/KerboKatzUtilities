@@ -5,7 +5,7 @@ namespace KerboKatz.Classes
 {
   public class vesselInfo
   {
-    public Dictionary<string,partInfo> partInfo;
+    public Dictionary<string, partInfo> partInfo;
     public List<scienceInfo> scienceInfo;
     public List<ProtoCrewMember> crewInfo;
     public Dictionary<string, resourceInfo> resourceInfo;
@@ -58,8 +58,8 @@ namespace KerboKatz.Classes
     {
       this.subject = subject;
       this.science = science;
-      this.title   = title;
-      this.data    = data;
+      this.title = title;
+      this.data = data;
     }
   }
 
@@ -74,12 +74,12 @@ namespace KerboKatz.Classes
     public float distanceModifier;
     public importantInfo(Vessel vessel, string vesselName, float totalCost, float totalScience, float crewCount, float distanceModifier, bool recover)
     {
-      this.vessel           = vessel;
-      this.vesselName       = vesselName;
-      this.totalCost        = totalCost;
-      this.totalScience     = totalScience;
-      this.crewCount        = crewCount;
-      this.recover          = recover;
+      this.vessel = vessel;
+      this.vesselName = vesselName;
+      this.totalCost = totalCost;
+      this.totalScience = totalScience;
+      this.crewCount = crewCount;
+      this.recover = recover;
       this.distanceModifier = distanceModifier;
     }
   }
@@ -88,19 +88,17 @@ namespace KerboKatz.Classes
   {
     public VesselType vesselType;
     public string name;
-    //public bool show;
     public Action callback;
     public bool init;
     public vesselTypes(VesselType vesselType, string name, bool show, Action callback)
     {
       this.vesselType = vesselType;
-      this.name       = name;
-      this.show       = show;
-      this.callback   = callback;
-      init            = true;
+      this.name = name;
+      this.show = show;
+      this.callback = callback;
+      init = true;
     }
 
-    //public bool show { get; set; }
     private bool _show;
 
     public bool show

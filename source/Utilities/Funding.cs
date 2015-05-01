@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
-
-namespace KerboKatz
+﻿namespace KerboKatz
 {
   public static partial class Utilities
   {
@@ -17,12 +11,5 @@ namespace KerboKatz
         global::Funding.Instance.AddFunds(add, reason);
       }
     }
-    #region deprecated
-    [Obsolete("Use Utilities.Science instead")]
-    public static void addFunds(float add, TransactionReasons reason)
-    {
-      Funding.addFunds(add, reason);
-    }
-    #endregion
   }
 }
