@@ -83,6 +83,15 @@ namespace KerboKatz.Extensions
       }
     }
 
+    public static KeyCode getDefaultPrimary(this KeyBinding KeyBinding)
+    {
+      if (KeyBindingStorage.ContainsKey(KeyBinding))
+      {
+        return KeyBindingStorage[KeyBinding].primary;
+      }
+      return KeyCode.None;
+    }
+
     private static Dictionary<AxisBinding, AxisBindingStorage> AxisBindingStorage = new Dictionary<AxisBinding, AxisBindingStorage>();
     public static void saveDefault(this AxisBinding AxisBinding)
     {

@@ -1,3 +1,5 @@
+v 1.2.2
+ * Added ability to move toolbar to Blizzy toolbar by shift+rightclicking
 v 1.2.1
  * Fixed:
   * Issues if only one of our mods is installed

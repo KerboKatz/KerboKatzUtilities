@@ -17,12 +17,15 @@ namespace KerboKatz
     protected override void Started()
     {
       setAppLauncherScenes(ApplicationLauncher.AppScenes.ALWAYS);
+      currentSettings.load("", "KerboKatzToolbarSettings", modName);
+      currentSettings.setDefault("UseBlizzyToolbar", "false");
     }
 
     private static Dictionary<string, ToolbarClass> references = new Dictionary<string, ToolbarClass>();
     private List<ToolbarClass> visibleInThisScene = new List<ToolbarClass>();
     private static bool isUpdateRequired;
     private bool updateSingleIcon;
+    private IButton BlizzyToolbarButton;
 
     public static void add(ToolbarClass toAdd)
     {
@@ -105,10 +108,18 @@ namespace KerboKatz
         if (visibleInThisScene.Count == 0)
         {
           useToolbar = true;
+          removeFromBlizzyToolbar();
         }
         else
         {
-          useToolbar = false;
+          if (currentSettings.getBool("UseBlizzyToolbar"))
+          {
+            registerBlizzyToolbar();
+          }
+          else
+          {
+            useToolbar = false;
+          }
           setAppLauncherScenes(ApplicationLauncher.AppScenes.ALWAYS);
         }
       }
@@ -120,7 +131,21 @@ namespace KerboKatz
 
     protected override void onToolbar()
     {
-      if (visibleInThisScene.Count == 1)
+      if (ToolbarManager.ToolbarAvailable && Input.GetMouseButtonUp(1) && (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)))
+      {
+        if (BlizzyToolbarButton == null)
+        {
+          currentSettings.set("UseBlizzyToolbar", true);
+          registerBlizzyToolbar();
+        }
+        else
+        {
+          currentSettings.set("UseBlizzyToolbar", false);
+          removeFromBlizzyToolbar();
+          updateToolbarStatus();
+        }
+      }
+      else if (visibleInThisScene.Count == 1)
       {
         visibleInThisScene[0].onClick();
       }
@@ -137,8 +162,39 @@ namespace KerboKatz
       }
     }
 
+    private void removeFromBlizzyToolbar()
+    {
+      if (BlizzyToolbarButton != null)
+      {
+        BlizzyToolbarButton.Destroy();
+        BlizzyToolbarButton = null;
+      }
+    }
+
+    private void registerBlizzyToolbar()
+    {
+      if (BlizzyToolbarButton == null)
+      {
+        BlizzyToolbarButton = ToolbarManager.Instance.add("KerboKatz", "KerboKatzToolbar");
+        BlizzyToolbarButton.TexturePath = "KerboKatz/Textures/KerboKatzToolbarBlizzy";
+        BlizzyToolbarButton.ToolTip = "KerboKatzToolbar";
+        BlizzyToolbarButton.OnClick += (e) =>
+        {
+          onToolbar();
+        };
+        removeFromApplicationLauncher();
+        removeFromToolbar();
+      }
+    }
+
     protected override void OnDestroy()
     {
+      if (currentSettings != null)
+      {
+        currentSettings.set("showToolbar", false);
+        currentSettings.save();
+      }
+      removeFromBlizzyToolbar();
       if (button != null)
       {
         ApplicationLauncher.Instance.RemoveModApplication(button);
