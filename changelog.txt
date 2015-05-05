@@ -1,3 +1,6 @@
+v 1.2.3
+ * Fixed:
+  * Possible duplication of icon in toolbar
 v 1.2.2
  * Added ability to move toolbar to Blizzy toolbar by shift+rightclicking
 v 1.2.1

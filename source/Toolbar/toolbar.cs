@@ -195,10 +195,8 @@ namespace KerboKatz
         currentSettings.save();
       }
       removeFromBlizzyToolbar();
-      if (button != null)
-      {
-        ApplicationLauncher.Instance.RemoveModApplication(button);
-      }
+      removeFromToolbar();
+      removeFromApplicationLauncher();
       GameEvents.onGUIApplicationLauncherReady.Remove(OnGuiAppLauncherReady);
     }
   }

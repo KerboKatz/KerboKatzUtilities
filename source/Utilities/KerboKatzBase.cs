@@ -185,14 +185,8 @@ namespace KerboKatz
       {
         currentSettings.save();
       }
-      if (useToolbar)
-      {
-        removeFromToolbar();
-      }
-      else
-      {
-        removeFromApplicationLauncher();
-      }
+      removeFromToolbar();
+      removeFromApplicationLauncher();
       afterDestroy();
     }
 
