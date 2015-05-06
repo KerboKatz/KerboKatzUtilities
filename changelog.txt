@@ -1,3 +1,5 @@
+v 1.2.4
+ * Added some more checks for the toolbar to reduce possible duplication of icons
 v 1.2.3
  * Fixed:
   * Possible duplication of icon in toolbar

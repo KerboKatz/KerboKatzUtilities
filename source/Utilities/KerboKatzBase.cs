@@ -13,7 +13,7 @@ namespace KerboKatz
     protected Version requiresUtilities;
     protected ToolbarClass thisButton;
     private Texture2D icon = new Texture2D(0, 0);
-    private ApplicationLauncher.AppScenes scences;
+    private ApplicationLauncher.AppScenes scences = ApplicationLauncher.AppScenes.NEVER;
     private bool _useToolbar = true;
     protected int toolbarSelected;
     public string tooltip;
@@ -166,16 +166,19 @@ namespace KerboKatz
 
     protected virtual void OnGuiAppLauncherReady()
     {
-      button = ApplicationLauncher.Instance.AddModApplication(
-          onToolbar, 	//RUIToggleButton.onTrue
-          onToolbar,	//RUIToggleButton.onFalse
-          null, //RUIToggleButton.OnHover
-          null, //RUIToggleButton.onHoverOut
-          null, //RUIToggleButton.onEnable
-          null, //RUIToggleButton.onDisable
-          scences, //visibleInScenes
-          icon//texture
-      );
+      if (button == null && ApplicationLauncher.Ready)
+      {
+        button = ApplicationLauncher.Instance.AddModApplication(
+            onToolbar, 	//RUIToggleButton.onTrue
+            onToolbar,	//RUIToggleButton.onFalse
+            null, //RUIToggleButton.OnHover
+            null, //RUIToggleButton.onHoverOut
+            null, //RUIToggleButton.onEnable
+            null, //RUIToggleButton.onDisable
+            scences, //visibleInScenes
+            icon//texture
+        );
+      }
     }
 
     protected virtual void OnDestroy()
