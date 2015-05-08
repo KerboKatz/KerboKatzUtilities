@@ -52,7 +52,7 @@ namespace KerboKatz {
 	/// <summary>
 	/// The global tool bar manager.
 	/// </summary>
-	public partial class ToolbarManager : IToolbarManager {
+	public partial class BlizzyToolbarManager : IToolbarManager {
 		/// <summary>
 		/// Whether the Toolbar Plugin is available.
 		/// </summary>
@@ -74,7 +74,7 @@ namespace KerboKatz {
 					Type type = ToolbarTypes.getType("Toolbar.ToolbarManager");
 					if (type != null) {
 						object realToolbarManager = ToolbarTypes.getStaticProperty(type, "Instance").GetValue(null, null);
-						instance_ = new ToolbarManager(realToolbarManager);
+						instance_ = new BlizzyToolbarManager(realToolbarManager);
 					}
 				}
 				return instance_;
@@ -499,7 +499,7 @@ namespace KerboKatz {
 
 	#region private implementations
 
-	public partial class ToolbarManager : IToolbarManager {
+	public partial class BlizzyToolbarManager : IToolbarManager {
 		private static bool? toolbarAvailable = null;
 		private static IToolbarManager instance_;
 
@@ -508,7 +508,7 @@ namespace KerboKatz {
 		private Dictionary<object, IButton> buttons = new Dictionary<object, IButton>();
 		private ToolbarTypes types = new ToolbarTypes();
 
-		private ToolbarManager(object realToolbarManager) {
+		private BlizzyToolbarManager(object realToolbarManager) {
 			this.realToolbarManager = realToolbarManager;
 
 			addMethod = ToolbarTypes.getMethod(types.iToolbarManagerType, "add");

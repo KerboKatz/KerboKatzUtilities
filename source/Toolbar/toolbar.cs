@@ -7,6 +7,7 @@ namespace KerboKatz
   [KSPAddon(KSPAddon.Startup.EveryScene, false)]
   public partial class Toolbar : KerboKatzBase
   {
+    public static List<string> toolbarOptions = new List<string> { "KerboKatz Toolbar", "Application Launcher" };
     private Toolbar()
     {
       modName = "KerboKatzToolbar";
@@ -19,13 +20,16 @@ namespace KerboKatz
       setAppLauncherScenes(ApplicationLauncher.AppScenes.ALWAYS);
       currentSettings.load("", "KerboKatzToolbarSettings", modName);
       currentSettings.setDefault("UseBlizzyToolbar", "false");
+      if (BlizzyToolbarManager.ToolbarAvailable)
+      {
+        toolbarOptions.AddUnique("Blizzy's toolbar");
+      }
     }
 
     private static Dictionary<string, ToolbarClass> references = new Dictionary<string, ToolbarClass>();
     private List<ToolbarClass> visibleInThisScene = new List<ToolbarClass>();
     private static bool isUpdateRequired;
     private bool updateSingleIcon;
-    private IButton BlizzyToolbarButton;
 
     public static void add(ToolbarClass toAdd)
     {
@@ -131,7 +135,7 @@ namespace KerboKatz
 
     protected override void onToolbar()
     {
-      if (ToolbarManager.ToolbarAvailable && Input.GetMouseButtonUp(1) && (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)))
+      if (BlizzyToolbarManager.ToolbarAvailable && Input.GetMouseButtonUp(1) && (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)))
       {
         if (BlizzyToolbarButton == null)
         {
@@ -159,31 +163,6 @@ namespace KerboKatz
         {
           currentSettings.set("showToolbar", true);
         }
-      }
-    }
-
-    private void removeFromBlizzyToolbar()
-    {
-      if (BlizzyToolbarButton != null)
-      {
-        BlizzyToolbarButton.Destroy();
-        BlizzyToolbarButton = null;
-      }
-    }
-
-    private void registerBlizzyToolbar()
-    {
-      if (BlizzyToolbarButton == null)
-      {
-        BlizzyToolbarButton = ToolbarManager.Instance.add("KerboKatz", "KerboKatzToolbar");
-        BlizzyToolbarButton.TexturePath = "KerboKatz/Textures/KerboKatzToolbarBlizzy";
-        BlizzyToolbarButton.ToolTip = "KerboKatzToolbar";
-        BlizzyToolbarButton.OnClick += (e) =>
-        {
-          onToolbar();
-        };
-        removeFromApplicationLauncher();
-        removeFromToolbar();
       }
     }
 

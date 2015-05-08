@@ -6,7 +6,6 @@ namespace KerboKatz
 {
   public partial class Toolbar : KerboKatzBase
   {
-    public static List<string> toolbarOptions = new List<string> { "KerboKatz Toolbar", "Application Launcher" };
     private bool initStyle;
     private int toolbarWindowID = 1702000000;
     private Rectangle settingsWindowRect = new Rectangle(Rectangle.updateType.Cursor);

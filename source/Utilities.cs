@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using UnityEngine;
+using KerboKatz.Extensions;
 
 namespace KerboKatz
 {
@@ -38,23 +39,62 @@ namespace KerboKatz
         return false;
       if (vessel.isEVA)
         return true;
-      List<ModuleCommand> commandModules = vessel.FindPartModulesImplementing<ModuleCommand>();
-      foreach (ModuleCommand commandModule in commandModules)
+      var commandModules = vessel.FindPartModulesImplementing<ModuleCommand>();
+      foreach (var commandModule in commandModules)
       {
         if (commandModule.part.protoModuleCrew.Count >= commandModule.minimumCrew)
           return true;
       }
+      //vessel.HasControlSources()
+      //var KerbalSeat = vessel.FindPartModulesImplementing<KerbalSeat>();
+      if (vessel.FindPartModulesImplementing<KerbalSeat>().Count > 0)
+      {
+        if (vessel.GetCrewCount() > 0)
+          return true;
+      } 
       return false;
     }
-
-    public static void debug(string mod, string message, params string[] strings)//thanks Sephiroth018 for this part
+    [Flags]
+    public enum LogMode
     {
-      //#if DEBUG
+      Log = 1,
+      Debug = 2,
+      Warning = 4,
+      Error = 8,
+      Exception = 16,
+    }
+    public static List<string> debugList = new List<string>();
+    public static void debug(string mod, LogMode mode, string message, params string[] strings)
+    {
+      if (strings.Length > 0)
+        message = string.Format(message, strings);
+      message = "[" + mod + "] " + message;
+      if (mode.HasFlag(LogMode.Log))
+      {
+        UnityEngine.Debug.Log(message);
+      }
+      else if (mode.HasFlag(LogMode.Debug) && debugList.Contains(mod))
+      {
+        UnityEngine.Debug.Log(message);
+      }
+      else if (mode.HasFlag(LogMode.Warning))
+      {
+        UnityEngine.Debug.LogWarning(message);
+      }
+      else if (mode.HasFlag(LogMode.Error))
+      {
+        UnityEngine.Debug.LogError(message);
+      }
+      else if (mode.HasFlag(LogMode.Exception))
+      {
+        UnityEngine.Debug.LogException(new Exception(message));
+      }
+    }
+    public static void debug(string mod, string message, params string[] strings)
+    {
       if (strings.Length > 0)
         message = string.Format(message, strings);
       UnityEngine.Debug.Log("[" + mod + "] " + message);
-
-      //#endif
     }
 
     public static string getEditorScene()

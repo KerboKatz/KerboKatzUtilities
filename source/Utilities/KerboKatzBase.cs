@@ -17,6 +17,9 @@ namespace KerboKatz
     private bool _useToolbar = true;
     protected int toolbarSelected;
     public string tooltip;
+    protected IButton BlizzyToolbarButton;
+    //private bool useBlizzyToolbar;
+    private bool _useBlizzyToolbar;
 
     protected bool useToolbar
     {
@@ -29,6 +32,21 @@ namespace KerboKatz
         if (_useToolbar != value)
         {
           _useToolbar = value;
+          updateToolbarStatus();
+        }
+      }
+    }
+    protected bool useBlizzyToolbar
+    {
+      get
+      {
+        return _useBlizzyToolbar;
+      }
+      set
+      {
+        if (_useBlizzyToolbar != value)
+        {
+          _useBlizzyToolbar = value;
           updateToolbarStatus();
         }
       }
@@ -52,11 +70,32 @@ namespace KerboKatz
         thisButton = new ToolbarClass(this, onToolbar, Utilities.getTexture("icon", modName + "/Textures"), GameScenes.MAINMENU);
       removeFromApplicationLauncher();
       removeFromToolbar();
+      removeFromBlizzyToolbar();
       if (useToolbar)
       {
         Toolbar.add(thisButton);
         if (currentSettings != null)
+        {
           currentSettings.set("useToolbar", true);
+          currentSettings.set("useBlizzyToolbar", false);
+        }
+      }
+      else if (useBlizzyToolbar)
+      {
+        if (BlizzyToolbarManager.ToolbarAvailable)
+        {
+          registerBlizzyToolbar();
+          if (currentSettings != null)
+          {
+            currentSettings.set("useToolbar", false);
+            currentSettings.set("useBlizzyToolbar", true);
+          }
+        }
+        else
+        {
+          useBlizzyToolbar = false;
+          useToolbar = true;
+        }
       }
       else
       {
@@ -69,7 +108,10 @@ namespace KerboKatz
           OnGuiAppLauncherReady();
         }
         if (currentSettings != null)
+        {
           currentSettings.set("useToolbar", false);
+          currentSettings.set("useBlizzyToolbar", false);
+        }
       }
     }
 
@@ -190,6 +232,7 @@ namespace KerboKatz
       }
       removeFromToolbar();
       removeFromApplicationLauncher();
+      removeFromBlizzyToolbar();
       afterDestroy();
     }
 
@@ -204,28 +247,37 @@ namespace KerboKatz
     protected void loadToolbarSettings()
     {
       currentSettings.setDefault("useToolbar", "true");
-      if (currentSettings.isSet("useToolbar"))
+      currentSettings.setDefault("useBlizzyToolbar", "false");
+      if (currentSettings.getBool("useToolbar"))
       {
-        useToolbar = currentSettings.getBool("useToolbar");
-        if (useToolbar)
-        {
-          toolbarSelected = 0;
-        }
-        else
-        {
-          toolbarSelected = 1;
-        }
+        toolbarSelected = 0;
       }
+      else if (currentSettings.getBool("useBlizzyToolbar"))
+      {
+        toolbarSelected = 2;
+      }
+      else
+      {
+        toolbarSelected = 1;
+      }
+      updateToolbarBool();
     }
 
     protected void updateToolbarBool()
     {
       if (toolbarSelected == 0 && useToolbar == false)
       {
+        useBlizzyToolbar = false;
         useToolbar = true;
       }
-      else if (toolbarSelected == 1 && useToolbar == true)
+      else if (toolbarSelected == 1 && (useToolbar == true || useBlizzyToolbar == true))
       {
+        useBlizzyToolbar = false;
+        useToolbar = false;
+      }
+      else if (toolbarSelected == 2 && useBlizzyToolbar == false)
+      {
+        useBlizzyToolbar = true;
         useToolbar = false;
       }
     }
@@ -245,6 +297,32 @@ namespace KerboKatz
         ApplicationLauncher.Instance.RemoveModApplication(button);
       }
       GameEvents.onGUIApplicationLauncherReady.Remove(OnGuiAppLauncherReady);
+    }
+
+    protected void removeFromBlizzyToolbar()
+    {
+      if (BlizzyToolbarButton != null)
+      {
+        BlizzyToolbarButton.Destroy();
+        BlizzyToolbarButton = null;
+      }
+    }
+
+    protected void registerBlizzyToolbar()
+    {
+      if (BlizzyToolbarButton == null)
+      {
+        BlizzyToolbarButton = BlizzyToolbarManager.Instance.add("KerboKatz", modName);
+        BlizzyToolbarButton.TexturePath = "KerboKatz/Textures/KerboKatzToolbarBlizzy";
+        BlizzyToolbarButton.ToolTip = tooltip;
+        BlizzyToolbarButton.Text = displayName;
+        BlizzyToolbarButton.OnClick += (e) =>
+        {
+          onToolbar();
+        };
+        removeFromApplicationLauncher();
+        removeFromToolbar();
+      }
     }
   }
 }

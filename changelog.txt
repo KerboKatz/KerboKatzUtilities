@@ -1,3 +1,7 @@
+v 1.2.5
+ * Added multiple loging options
+ * Minimal support for all mods to use Blizzy's toolbar
+ * Simple detection for external command seats
 v 1.2.4
  * Added some more checks for the toolbar to reduce possible duplication of icons
 v 1.2.3

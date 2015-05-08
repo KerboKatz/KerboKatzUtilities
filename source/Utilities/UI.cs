@@ -36,12 +36,6 @@ namespace KerboKatz
           windowRect.isLocking = false;
         }
       }
-      /*
-      private static void clampToScreen(ref Rect rect)
-      {
-        rect.x = Mathf.Clamp(rect.x, 0, Screen.width - rect.width);
-        rect.y = Mathf.Clamp(rect.y, 0, Screen.height - rect.height);
-      }*/
 
       public static void createLabel(string label, GUIStyle style, string tooltip = "")
       {
