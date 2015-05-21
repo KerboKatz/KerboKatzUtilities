@@ -7,20 +7,35 @@ namespace KerboKatz
   {
     private float lastFPSCheck;
     private float framesSinceLastCheck;
+    private static FPS _instance;
 
-    public static float minFPS { get; private set; }
+    public static FPS instance
+    {
+      get
+      {
+        if (!_instance.enabled)
+        {
+          _instance.enabled = true;
+        }
+        return _instance;
+      }
+    }
 
-    public static float currentFPS { get; private set; }
+    public float minFPS { get; private set; }
 
-    public static float maxFPS { get; private set; }
+    public float currentFPS { get; private set; }
 
-    public void Start()
+    public float maxFPS { get; private set; }
+
+    private void Start()
     {
       minFPS = float.MaxValue;
       DontDestroyOnLoad(this);
+      _instance = this;
+      _instance.enabled = false;
     }
 
-    public void Update()
+    private void Update()
     {
       if (lastFPSCheck + 1 > Time.realtimeSinceStartup)
       {
@@ -38,7 +53,7 @@ namespace KerboKatz
       }
     }
 
-    public static void resetMinMax()
+    public void resetMinMax()
     {
       minFPS = float.MaxValue;
       maxFPS = 0;

@@ -12,6 +12,7 @@ namespace KerboKatz
     {
       public static void createWindow(bool showWindow, int windowID, ref Rectangle windowRect, GUI.WindowFunction windowFunction, string windowName, GUIStyle windowStyle, bool lockEditorUI = false)
       {
+        //debug("", windowID + "");
         bool containing = false;
         if (showWindow)
         {
@@ -238,7 +239,19 @@ namespace KerboKatz
           if (tooltipStyle == null)
             tooltipStyle = getTooltipStyle();
 
-          GUI.Window(1701999999, tooltipRect.rect, showTooltip, "", GUIStyle.none);
+          GUI.Window(tooltipWindowID, tooltipRect.rect, showTooltip, "", GUIStyle.none);
+        }
+      }
+
+      private static int lastWindowID = 1700000000;
+      private static int tooltipWindowID = getNewWindowID;
+
+      public static int getNewWindowID
+      {
+        get
+        {
+          lastWindowID++;
+          return lastWindowID;
         }
       }
 

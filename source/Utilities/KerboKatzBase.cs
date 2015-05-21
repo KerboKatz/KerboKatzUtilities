@@ -36,6 +36,7 @@ namespace KerboKatz
         }
       }
     }
+
     protected bool useBlizzyToolbar
     {
       get
@@ -74,22 +75,12 @@ namespace KerboKatz
       if (useToolbar)
       {
         Toolbar.add(thisButton);
-        if (currentSettings != null)
-        {
-          currentSettings.set("useToolbar", true);
-          currentSettings.set("useBlizzyToolbar", false);
-        }
       }
       else if (useBlizzyToolbar)
       {
         if (BlizzyToolbarManager.ToolbarAvailable)
         {
           registerBlizzyToolbar();
-          if (currentSettings != null)
-          {
-            currentSettings.set("useToolbar", false);
-            currentSettings.set("useBlizzyToolbar", true);
-          }
         }
         else
         {
@@ -107,11 +98,11 @@ namespace KerboKatz
         {
           OnGuiAppLauncherReady();
         }
-        if (currentSettings != null)
-        {
-          currentSettings.set("useToolbar", false);
-          currentSettings.set("useBlizzyToolbar", false);
-        }
+      }
+      if (currentSettings != null)
+      {
+        currentSettings.set("useToolbar", useToolbar);
+        currentSettings.set("useBlizzyToolbar", useBlizzyToolbar);
       }
     }
 
@@ -185,10 +176,7 @@ namespace KerboKatz
       {
         button.VisibleInScenes = scences;
       }
-      else
-      {
-        this.scences = scences;
-      }
+      this.scences = scences;
     }
 
     public void setIcon(Texture2D icon)
@@ -217,9 +205,10 @@ namespace KerboKatz
             null, //RUIToggleButton.onHoverOut
             null, //RUIToggleButton.onEnable
             null, //RUIToggleButton.onDisable
-            scences, //visibleInScenes
+            ApplicationLauncher.AppScenes.ALWAYS, //visibleInScenes
             icon//texture
         );
+        GameEvents.onGUIApplicationLauncherReady.Remove(OnGuiAppLauncherReady);
       }
     }
 
@@ -292,6 +281,7 @@ namespace KerboKatz
 
     protected void removeFromApplicationLauncher()
     {
+      Utilities.debug(modName, "removeFromApplicationLauncher");
       if (button != null)
       {
         ApplicationLauncher.Instance.RemoveModApplication(button);

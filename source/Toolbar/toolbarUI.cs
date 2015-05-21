@@ -1,5 +1,4 @@
 ﻿using KerboKatz.Extensions;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace KerboKatz
@@ -7,7 +6,7 @@ namespace KerboKatz
   public partial class Toolbar : KerboKatzBase
   {
     private bool initStyle;
-    private int toolbarWindowID = 1702000000;
+    private static int toolbarWindowID = Utilities.UI.getNewWindowID;
     private Rectangle settingsWindowRect = new Rectangle(Rectangle.updateType.Cursor);
     private GUIStyle toolbarWindowStyle;
     private GUIStyle textStyle;

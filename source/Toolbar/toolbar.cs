@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace KerboKatz
 {
-  [KSPAddon(KSPAddon.Startup.EveryScene, false)]
+  [KSPAddon(KSPAddon.Startup.Instantly, true)]
   public partial class Toolbar : KerboKatzBase
   {
     public static List<string> toolbarOptions = new List<string> { "KerboKatz Toolbar", "Application Launcher" };
@@ -12,12 +12,13 @@ namespace KerboKatz
     {
       modName = "KerboKatzToolbar";
       requiresUtilities = new Version(1, 2, 0);
-      useToolbar = true;
+      //useToolbar = true;
     }
 
     protected override void Started()
     {
-      setAppLauncherScenes(ApplicationLauncher.AppScenes.ALWAYS);
+      DontDestroyOnLoad(this);
+      setAppLauncherScenes(ApplicationLauncher.AppScenes.NEVER);
       currentSettings.load("", "KerboKatzToolbarSettings", modName);
       currentSettings.setDefault("UseBlizzyToolbar", "false");
       if (BlizzyToolbarManager.ToolbarAvailable)
@@ -111,7 +112,8 @@ namespace KerboKatz
         }
         if (visibleInThisScene.Count == 0)
         {
-          useToolbar = true;
+          setAppLauncherScenes(ApplicationLauncher.AppScenes.NEVER);
+          //useToolbar = true;
           removeFromBlizzyToolbar();
         }
         else
@@ -173,9 +175,10 @@ namespace KerboKatz
         currentSettings.set("showToolbar", false);
         currentSettings.save();
       }
-      removeFromBlizzyToolbar();
+      Utilities.debug(modName, Utilities.LogMode.Error, "wtf");
       removeFromToolbar();
       removeFromApplicationLauncher();
+      removeFromBlizzyToolbar();
       GameEvents.onGUIApplicationLauncherReady.Remove(OnGuiAppLauncherReady);
     }
   }

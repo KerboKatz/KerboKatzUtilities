@@ -1,11 +1,11 @@
-﻿using System;
+﻿using KerboKatz.Extensions;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using UnityEngine;
-using KerboKatz.Extensions;
 
 namespace KerboKatz
 {
@@ -51,9 +51,10 @@ namespace KerboKatz
       {
         if (vessel.GetCrewCount() > 0)
           return true;
-      } 
+      }
       return false;
     }
+
     [Flags]
     public enum LogMode
     {
@@ -63,6 +64,7 @@ namespace KerboKatz
       Error = 8,
       Exception = 16,
     }
+
     public static List<string> debugList = new List<string>();
     public static void debug(string mod, LogMode mode, string message, params string[] strings)
     {
@@ -90,6 +92,7 @@ namespace KerboKatz
         UnityEngine.Debug.LogException(new Exception(message));
       }
     }
+
     public static void debug(string mod, string message, params string[] strings)
     {
       if (strings.Length > 0)

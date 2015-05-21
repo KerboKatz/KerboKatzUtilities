@@ -1,3 +1,6 @@
+v 1.2.6
+ * Added modal window
+ * Fixed toolbar duplication in some cases
 v 1.2.5
  * Added multiple loging options
  * Minimal support for all mods to use Blizzy's toolbar

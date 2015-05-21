@@ -21,6 +21,7 @@ namespace KerboKatz.Extensions
     {
       return (source & flag) == flag;
     }
+
     public static bool HasFlag(this Utilities.LogMode source, Utilities.LogMode flag)
     {
       return (source & flag) == flag;

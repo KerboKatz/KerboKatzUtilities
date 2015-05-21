@@ -17,10 +17,13 @@ namespace KerboKatz
       settingsPath = KSPUtil.ApplicationRootPath + "GameData/KerboKatz/" + path + "/PluginData/";
       settingsFile = settingsPath + file + ".cfg";
       settingsName = name;
-      settingsContainer = ConfigNode.Load(settingsFile);
-      if (settingsContainer != null)
-      {//if there was a settings file load the values from the file into the dictionary
-        loadSettings();
+      if (File.Exists(settingsFile))
+      {
+        settingsContainer = ConfigNode.Load(settingsFile);
+        if (settingsContainer != null)
+        {//if there was a settings file load the values from the file into the dictionary
+          loadSettings();
+        }
       }
       settingsContainer = new ConfigNode(settingsName);
     }
