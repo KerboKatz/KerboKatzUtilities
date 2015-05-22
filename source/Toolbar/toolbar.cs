@@ -8,6 +8,11 @@ namespace KerboKatz
   public partial class Toolbar : KerboKatzBase
   {
     public static List<string> toolbarOptions = new List<string> { "KerboKatz Toolbar", "Application Launcher" };
+    private static Dictionary<string, ToolbarClass> references = new Dictionary<string, ToolbarClass>();
+    private List<ToolbarClass> visibleInThisScene = new List<ToolbarClass>();
+    private static bool isUpdateRequired;
+    private bool updateSingleIcon;
+
     private Toolbar()
     {
       modName = "KerboKatzToolbar";
@@ -25,12 +30,13 @@ namespace KerboKatz
       {
         toolbarOptions.AddUnique("Blizzy's toolbar");
       }
+      GameEvents.onGameSceneLoadRequested.Add(sceneChange);
     }
 
-    private static Dictionary<string, ToolbarClass> references = new Dictionary<string, ToolbarClass>();
-    private List<ToolbarClass> visibleInThisScene = new List<ToolbarClass>();
-    private static bool isUpdateRequired;
-    private bool updateSingleIcon;
+    private void sceneChange(GameScenes newScene)
+    {
+      isUpdateRequired = true;
+    }
 
     public static void add(ToolbarClass toAdd)
     {
@@ -180,6 +186,7 @@ namespace KerboKatz
       removeFromApplicationLauncher();
       removeFromBlizzyToolbar();
       GameEvents.onGUIApplicationLauncherReady.Remove(OnGuiAppLauncherReady);
+      GameEvents.onGameSceneLoadRequested.Remove(sceneChange);
     }
   }
 

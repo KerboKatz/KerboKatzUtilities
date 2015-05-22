@@ -1,3 +1,5 @@
+v 1.2.7
+ * Fixed issues with toolbar
 v 1.2.6
  * Added modal window
  * Fixed toolbar duplication in some cases
