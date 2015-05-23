@@ -12,9 +12,8 @@ namespace KerboKatz
     {
       public static void createWindow(bool showWindow, int windowID, ref Rectangle windowRect, GUI.WindowFunction windowFunction, string windowName, GUIStyle windowStyle, bool lockEditorUI = false)
       {
-        //debug("", windowID + "");
         bool containing = false;
-        if (showWindow)
+        if (showWindow && !UIEvents._instance.hiddenUI)
         {
           windowRect.rect = GUILayout.Window(windowID, windowRect.rect, windowFunction, windowName, windowStyle);
           windowRect.performUpdate();

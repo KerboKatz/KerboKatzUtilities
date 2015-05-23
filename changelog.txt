@@ -1,3 +1,5 @@
+v 1.2.8
+ * Toggling the UI now hides all KerboKatz mods aswell
 v 1.2.7
  * Fixed issues with toolbar
 v 1.2.6
