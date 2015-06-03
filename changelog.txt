@@ -1,3 +1,5 @@
+v 1.2.9
+ * Fixed issue with toolbar showing up in the main menu after switching back and forth between scences
 v 1.2.8
  * Toggling the UI now hides all KerboKatz mods aswell
 v 1.2.7

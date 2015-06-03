@@ -27,6 +27,7 @@ namespace KerboKatz
     protected override void Started()
     {
       GameEvents.onGameSceneLoadRequested.Add(onSceneSwitch);
+      setAppLauncherScenes(ApplicationLauncher.AppScenes.NEVER);
     }
 
     private void onSceneSwitch(GameScenes data)

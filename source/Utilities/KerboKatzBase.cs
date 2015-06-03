@@ -205,7 +205,7 @@ namespace KerboKatz
             null, //RUIToggleButton.onHoverOut
             null, //RUIToggleButton.onEnable
             null, //RUIToggleButton.onDisable
-            ApplicationLauncher.AppScenes.ALWAYS, //visibleInScenes
+            scences, //visibleInScenes
             icon//texture
         );
         GameEvents.onGUIApplicationLauncherReady.Remove(OnGuiAppLauncherReady);
