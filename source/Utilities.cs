@@ -11,7 +11,7 @@ namespace KerboKatz
 {
   public static partial class Utilities
   {
-    private static Regex regexOnlyNumbers = new Regex(@"[^0-9]");
+    private static Regex regexOnlyNumbers = new Regex(@"[^0-9\.]");
     private static Version utilitiesVersion;
     public static Version getUtilitiesVersion()
     {

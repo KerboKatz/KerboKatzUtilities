@@ -36,6 +36,10 @@ namespace KerboKatz
     private void sceneChange(GameScenes newScene)
     {
       isUpdateRequired = true;
+      settingsWindowRect.x = 0;
+      settingsWindowRect.y = 0;
+      currentSettings.set("showToolbar", false);
+      settingsWindowRect.UpdatePosition = Extensions.Rectangle.updateType.Cursor;
     }
 
     public static void add(ToolbarClass toAdd)

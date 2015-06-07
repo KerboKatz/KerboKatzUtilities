@@ -315,8 +315,13 @@ namespace KerboKatz
         }
         return outString;
       }
-
+      [Obsolete()]
       public static float createSlider(string label, float current, float minValue, float maxValue, GUIStyle textStyle = null, GUIStyle numberFieldStyle = null, GUIStyle horizontalSlider = null, GUIStyle horizontalSliderThumb = null, string tooltip = "", float limitValue = 0)
+      {
+        return createSlider(label, current, minValue, maxValue, 1, textStyle, numberFieldStyle, horizontalSlider, horizontalSliderThumb, tooltip, limitValue);
+      }
+
+      public static float createSlider(string label, float current, float minValue, float maxValue, float steps = 1, GUIStyle textStyle = null, GUIStyle numberFieldStyle = null, GUIStyle horizontalSlider = null, GUIStyle horizontalSliderThumb = null, string tooltip = "", float limitValue = 0)
       {
         if (textStyle == null)
           textStyle = HighLogic.Skin.label;
@@ -326,13 +331,15 @@ namespace KerboKatz
           horizontalSliderThumb = HighLogic.Skin.horizontalSliderThumb;
         if (numberFieldStyle == null)
           numberFieldStyle = HighLogic.Skin.textField;
-
+        current = current / steps;
+        minValue = minValue / steps;
+        maxValue = maxValue / steps;
         Utilities.UI.createLabel(label, textStyle, tooltip);
         GUILayout.BeginHorizontal();
         GUILayout.BeginVertical();
         current = Utilities.round(GUILayout.HorizontalSlider(current, minValue, maxValue, horizontalSlider, horizontalSliderThumb), 0);
         GUILayout.EndVertical();
-        current = Utilities.round(Utilities.toFloat(Utilities.getOnlyNumbers(GUILayout.TextField(current.ToString(), numberFieldStyle))), 0);
+        current = Utilities.round(Utilities.toFloat(Utilities.getOnlyNumbers(GUILayout.TextField((current * steps).ToString("N" + getDecimalsCount(steps)), numberFieldStyle))) / steps, 0);
         if (limitValue == 0)
         {
           if (current > maxValue)
@@ -349,8 +356,49 @@ namespace KerboKatz
         }
         if (current < minValue)
           current = minValue;
+
         GUILayout.EndHorizontal();
-        return current;
+        return current * steps;
+      }
+
+      private static string getDecimalsCount(float steps)
+      {
+        return Mathf.Clamp((((steps - (int)steps) + "").Length - 2), 0, float.MaxValue).ToString();
+      }
+
+      public static List<string> anchorOptions = new List<string> { "Upper Left", "Upper Center", "Upper Right", "Middle Left", "Middle Center", "Middle Right", "Lower Left", "Lower Center", "Lower Right" };
+      public static void setAnchorPosition(GUIStyle style, int option)
+      {
+        switch (option)
+        {
+          case 0:
+            style.alignment = TextAnchor.UpperLeft;
+            break;
+          case 1:
+            style.alignment = TextAnchor.UpperCenter;
+            break;
+          case 2:
+            style.alignment = TextAnchor.UpperRight;
+            break;
+          case 3:
+            style.alignment = TextAnchor.MiddleLeft;
+            break;
+          case 4:
+            style.alignment = TextAnchor.MiddleCenter;
+            break;
+          case 5:
+            style.alignment = TextAnchor.MiddleRight;
+            break;
+          case 6:
+            style.alignment = TextAnchor.LowerLeft;
+            break;
+          case 7:
+            style.alignment = TextAnchor.LowerCenter;
+            break;
+          case 8:
+            style.alignment = TextAnchor.LowerRight;
+            break;
+        }
       }
     }
   }

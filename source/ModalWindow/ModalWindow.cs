@@ -28,6 +28,7 @@ namespace KerboKatz
     {
       GameEvents.onGameSceneLoadRequested.Add(onSceneSwitch);
       setAppLauncherScenes(ApplicationLauncher.AppScenes.NEVER);
+      currentSettings = null;
     }
 
     private void onSceneSwitch(GameScenes data)
