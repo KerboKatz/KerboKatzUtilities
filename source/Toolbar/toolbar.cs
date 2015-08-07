@@ -185,7 +185,6 @@ namespace KerboKatz
         currentSettings.set("showToolbar", false);
         currentSettings.save();
       }
-      Utilities.debug(modName, Utilities.LogMode.Error, "wtf");
       removeFromToolbar();
       removeFromApplicationLauncher();
       removeFromBlizzyToolbar();

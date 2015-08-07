@@ -235,6 +235,12 @@ namespace KerboKatz
 
     protected void loadToolbarSettings()
     {
+      if (currentSettings == null)
+      {
+        toolbarSelected = 0;
+        updateToolbarBool();
+        return;
+      }
       currentSettings.setDefault("useToolbar", "true");
       currentSettings.setDefault("useBlizzyToolbar", "false");
       if (currentSettings.getBool("useToolbar"))

@@ -14,6 +14,7 @@ namespace KerboKatz
 
     public void load(string path, string file, string name)
     {
+      currentSettings.Clear();
       settingsPath = KSPUtil.ApplicationRootPath + "GameData/KerboKatz/" + path + "/PluginData/";
       settingsFile = settingsPath + file + ".cfg";
       settingsName = name;
@@ -28,6 +29,14 @@ namespace KerboKatz
       settingsContainer = new ConfigNode(settingsName);
     }
 
+    public bool saveFileExists(string path, string file)
+    {
+      if (File.Exists(KSPUtil.ApplicationRootPath + "GameData/KerboKatz/" + path + "/PluginData/" + file + ".cfg"))
+      {
+        return true;
+      }
+      return false;
+    }
     public bool isSet(string key)
     {
       return currentSettings.ContainsKey(key);

@@ -155,6 +155,11 @@ namespace KerboKatz
       {
         updateTooltipAndDrag(null, 200, true);
       }
+      public static void updateTooltipAndDrag(float tooltipWidth = 200,Rect dragBox = new Rect(),GUIStyle style = null)
+      {
+        GUI.DragWindow(dragBox);
+        updateTooltipAndDrag(style, tooltipWidth, false);
+      }
 
       public static void updateTooltipAndDrag(GUIStyle style = null, float tooltipWidth = 200, bool drag = true)
       {

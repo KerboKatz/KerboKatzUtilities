@@ -1,3 +1,6 @@
+v 1.2.11
+ * More compact toolbar
+ * Fixed minor exception during start-up 
 v 1.2.9
  * Fixed issue with toolbar showing up in the main menu after switching back and forth between scences
 v 1.2.8
