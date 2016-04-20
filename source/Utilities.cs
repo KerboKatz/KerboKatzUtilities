@@ -4,30 +4,39 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Text.RegularExpressions;
 using UnityEngine;
 
 namespace KerboKatz
 {
+
+  [Flags]
+  public enum LogMode
+  {
+    Log = 1,
+    Warning = 2,
+    Error = 4,
+    Exception = 8,
+  }
   public static partial class Utilities
   {
-    private static Regex regexOnlyNumbers = new Regex(@"[^0-9\.]");
     private static Version utilitiesVersion;
-    public static Version getUtilitiesVersion()
+    public static Version GetUtilitiesVersion()
     {
       if (utilitiesVersion == null)
       {
         utilitiesVersion = new Version(FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion);
-        debug("KerboKatzUtilities", "Version:" + utilitiesVersion);
+        Debug("KerboKatzUtilities", "Version:" + utilitiesVersion);
       }
       return utilitiesVersion;
     }
 
-    public static bool checkUtilitiesSupport(Version requiresUtilities, string modName)
+    public static bool CheckUtilitiesSupport(Version requiresUtilities, string modName)
     {
-      if (getUtilitiesVersion().CompareTo(requiresUtilities) < 0)
+      if (GetUtilitiesVersion().CompareTo(requiresUtilities) < 0)
       {
-        debug(modName, "Requires KerboKatzUtilities version: " + requiresUtilities);
+        Debug(modName, "Requires KerboKatzUtilities version: " + requiresUtilities);
         return false;
       }
       return true;
@@ -54,50 +63,40 @@ namespace KerboKatz
       }
       return false;
     }
-
-    [Flags]
-    public enum LogMode
+    
+    public static void Debug(string modName, LogMode mode, params object[] debugStrings)
     {
-      Log = 1,
-      Debug = 2,
-      Warning = 4,
-      Error = 8,
-      Exception = 16,
-    }
-
-    public static List<string> debugList = new List<string>();
-    public static void debug(string mod, LogMode mode, string message, params string[] strings)
-    {
-      if (strings.Length > 0)
-        message = string.Format(message, strings);
-      message = "[" + mod + "] " + message;
-      if (mode.HasFlag(LogMode.Log))
+      if (debugStrings.Length == 0)
+        return;
+      var debugStringBuilder = new StringBuilder();
+      debugStringBuilder.Append("[");
+      debugStringBuilder.Append(modName);
+      debugStringBuilder.Append("] ");
+      foreach (var debugString in debugStrings)
       {
-        UnityEngine.Debug.Log(message);
+        debugStringBuilder.Append(debugString.ToString());
       }
-      else if (mode.HasFlag(LogMode.Debug) && debugList.Contains(mod))
+      if (mode == LogMode.Log)
       {
-        UnityEngine.Debug.Log(message);
+        UnityEngine.Debug.Log(debugStringBuilder);
       }
-      else if (mode.HasFlag(LogMode.Warning))
+      else if (mode == LogMode.Warning)
       {
-        UnityEngine.Debug.LogWarning(message);
+        UnityEngine.Debug.LogWarning(debugStringBuilder);
       }
-      else if (mode.HasFlag(LogMode.Error))
+      else if (mode == LogMode.Error)
       {
-        UnityEngine.Debug.LogError(message);
+        UnityEngine.Debug.LogError(debugStringBuilder);
       }
-      else if (mode.HasFlag(LogMode.Exception))
+      else if (mode == LogMode.Exception)
       {
-        UnityEngine.Debug.LogException(new Exception(message));
+        UnityEngine.Debug.LogException(new Exception(debugStringBuilder.ToString()));
       }
     }
 
-    public static void debug(string mod, string message, params string[] strings)
+    public static void Debug(string mod, params object[] strings)
     {
-      if (strings.Length > 0)
-        message = string.Format(message, strings);
-      UnityEngine.Debug.Log("[" + mod + "] " + message);
+      Debug(mod, LogMode.Log, strings);
     }
 
     public static string getEditorScene()
@@ -151,36 +150,6 @@ namespace KerboKatz
     }
 
     #endregion numbermethods
-    #region stringmethods
-    public static string getOnlyNumbers(string str)
-    {
-      str = regexOnlyNumbers.Replace(str, "").TrimStart('0');
-      if (string.IsNullOrEmpty(str))
-      {
-        TextEditor editor = (TextEditor)GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
-        editor.selectPos = 1;
-        editor.pos = 1;
-        return "0";
-      }
-      return str;
-    }
-
-    #endregion stringmethods
-    #region http://stackoverflow.com/a/444818
-    public static bool Contains(this string source, string toCheck, StringComparison comp = StringComparison.OrdinalIgnoreCase)
-    {
-      return source.IndexOf(toCheck, comp) >= 0;
-    }
-
-    #endregion http://stackoverflow.com/a/444818
-    #region http://stackoverflow.com/a/6535516
-    public static bool IsNullOrWhiteSpace(this string value)
-    {
-      if (value == null) return true;
-      return string.IsNullOrEmpty(value.Trim());
-    }
-
-    #endregion http://stackoverflow.com/a/6535516
 
     #region timemethods
     public static double getUnixTimestamp()
@@ -194,10 +163,10 @@ namespace KerboKatz
     }
 
     #endregion timemethods
-    public static Texture2D getTexture(string file, string path, bool asNormal = false)
+    /*public static Texture2D GetTexture(string file, string path, bool asNormal = false)
     {
       return GameDatabase.Instance.GetTexture("KerboKatz/" + path + "/" + file, asNormal);
-    }
+    }*/
 
     public static string[] reverseArray(string[] arrayToReverse)
     {

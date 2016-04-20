@@ -1,11 +1,17 @@
 ﻿using KerboKatz.Classes;
+using KSP.UI.Screens;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
-namespace KerboKatz.Extensions
+namespace KerboKatz
 {
   public static partial class SmallExtensions
   {
+    public static string NormalizePath(this DirectoryInfo path)
+    {
+      return path.FullName.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+    }
     public static void setToZero(this RectOffset offset)
     {
       offset.left = 0;
@@ -21,11 +27,7 @@ namespace KerboKatz.Extensions
     {
       return (source & flag) == flag;
     }
-
-    public static bool HasFlag(this Utilities.LogMode source, Utilities.LogMode flag)
-    {
-      return (source & flag) == flag;
-    }
+    
 
     public static Rect moveToCursor(this Rect rect, float offsetX = 10, float offsetY = 10)
     {

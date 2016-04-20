@@ -1,12 +1,12 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
+using UnityEngine;
 
 namespace KerboKatz
 {
   [KSPAddon(KSPAddon.Startup.Instantly, true)]
   public partial class FPS : MonoBehaviour
   {
-    private float lastFPSCheck;
-    private float framesSinceLastCheck;
     private static FPS _instance;
 
     public static FPS instance
@@ -21,41 +21,45 @@ namespace KerboKatz
       }
     }
 
-    public float minFPS { get; private set; }
 
-    public float currentFPS { get; private set; }
+    private Queue<Stopwatch> frames = new Queue<Stopwatch>();
+    public static int currentFPS { get; private set; }
+    public static int maxFPS { get; private set; }
+    public static int minFPS { get; private set; }
+    private void Update()
+    {
+      var frameSW = new Stopwatch();
+      frameSW.Start();
+      frames.Enqueue(frameSW);
+      PeekAndRemove();
+      if (currentFPS < minFPS && currentFPS > 0)
+        minFPS = currentFPS;
+      if (currentFPS > maxFPS)
+        maxFPS = currentFPS;
 
-    public float maxFPS { get; private set; }
+      currentFPS = frames.Count;
+    }
+
+    private void PeekAndRemove()
+    {
+      if (frames.Count == 0)
+        return;
+      if (frames.Peek().Elapsed.TotalMilliseconds >= 1000)
+      {
+        frames.Dequeue();
+        PeekAndRemove();
+      }
+    }
 
     private void Start()
     {
-      minFPS = float.MaxValue;
+      minFPS = int.MaxValue;
       DontDestroyOnLoad(this);
       _instance = this;
-      _instance.enabled = false;
     }
-
-    private void Update()
+    public void ResetMinMax()
     {
-      if (lastFPSCheck + 1 > Time.realtimeSinceStartup)
-      {
-        framesSinceLastCheck++;
-      }
-      else
-      {
-        currentFPS = framesSinceLastCheck / (Time.realtimeSinceStartup - lastFPSCheck);
-        framesSinceLastCheck = framesSinceLastCheck - currentFPS;
-        lastFPSCheck = Time.realtimeSinceStartup;
-        if (currentFPS < minFPS && currentFPS > 0)
-          minFPS = currentFPS;
-        if (currentFPS > maxFPS)
-          maxFPS = currentFPS;
-      }
-    }
-
-    public void resetMinMax()
-    {
-      minFPS = float.MaxValue;
+      minFPS = int.MaxValue;
       maxFPS = 0;
     }
   }

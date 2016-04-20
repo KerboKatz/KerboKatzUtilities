@@ -20,6 +20,7 @@
 
 # Shared objects (inc. Windows DLLs)
 #*.dll
+*.so
 *.so.*
 *.dylib
 
@@ -227,4 +228,3 @@ FakesAssemblies/
 
 # Visual Studio 6 workspace options file
 *.opt
-*.dll

@@ -1,12 +1,110 @@
-﻿using System.Collections.Generic;
+﻿using KerboKatz.UI;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using UnityEngine;
+using UnityEngine.Events;
 
 namespace KerboKatz
 {
+  public class CraftDataEvent : UnityEvent<CraftData> { }
+  public class CraftData
+  {
+    public string name;
+    public bool completeCraft;
+    public int partCount;
+    public int stageCount;
+    public float cost;
+    //public HashSet<string> categories = new HashSet<string>();
+    public DateTime lastSave;
+    public bool isDone;
+    public Texture2D thumbnail;
+    public CraftDataEvent OnSaveRequest = new CraftDataEvent();
+    public ConfigNode[] partNodes;
+
+    public ConfigNode configNode;
+
+    public DropDownMultiSelect MultiSelect;
+    public GameObject UIObject;
+    public FileInfo fileInfo;
+    public DirectoryInfo directoryInfo;
+
+    private string _path;
+    public string path
+    {
+      get
+      {
+        return _path;
+      }
+      set
+      {
+        _path = Path.GetFullPath(value);
+      }
+    }
+
+    /*public void RemoveCategory(string categoryName)
+    {
+      if (categories.Remove(categoryName))
+      {
+        OnSaveRequest.Invoke(this);
+      }
+    }
+    public void RenameCategory(string oldName, string newName)
+    {
+      if (categories.Remove(oldName))
+      {
+        if (categories.Add(newName))
+        {
+          OnSaveRequest.Invoke(this);
+        }
+      }
+    }
+
+    public void ToggleCategory(string categoryName, bool isOn)
+    {
+      if (isOn)
+      {
+        if (categories.Add(categoryName))
+        {
+          OnSaveRequest.Invoke(this);
+        }
+      }
+      else
+      {
+        if (categories.Remove(categoryName))
+        {
+          OnSaveRequest.Invoke(this);
+        }
+      }
+    }*/
+    public override string ToString()
+    {
+      var sb = new StringBuilder();
+      sb.Append(name);
+      sb.Append("_");
+      sb.Append(lastSave.ToString());
+      sb.Append("_");
+      sb.Append(completeCraft);
+      sb.Append("_");
+      sb.Append(partCount);
+      sb.Append("_");
+      sb.Append(stageCount);
+      sb.Append("_");
+      sb.Append(cost);
+      /*foreach (var category in categories)
+      {
+        sb.Append("_");
+        sb.Append(category);
+      }*/
+      return sb.ToString();
+    }
+  }
   public static partial class Utilities
   {
     public static partial class Craft
     {
-      public static string getPartAndStageString(int count, string p, bool zeroNumber = true)
+      public static string GetPartAndStageString(int count, string p, bool zeroNumber = true)
       {
         if (count > 1)
         {
@@ -26,49 +124,59 @@ namespace KerboKatz
         }
       }
 
-      public static void getCraftCostAndStages(ConfigNode nodes, ConfigNode[] partList, out int craftStages, out float craftCost, out bool completeCraft, out string[] craftCategories)
+      public static CraftData GetCraftInfo(FileInfo file)
       {
-        craftCost = 0;
-        craftStages = 0;
-        completeCraft = true;
-        craftCategories = nodes.GetValues("category");
-        foreach (ConfigNode part in partList)
+        //FileInfo fileInfo = //new FileInfo(file);
+        var path = file.FullName;
+        var craftData = new CraftData();
+        craftData.fileInfo = file;
+        craftData.directoryInfo = file.Directory;
+        craftData.configNode = ConfigNode.Load(path);
+        craftData.partNodes = craftData.configNode.GetNodes("PART");
+        craftData.path = path;
+        craftData.partCount = craftData.partNodes.Length;
+        craftData.cost = 0;
+        craftData.stageCount = 0;
+        craftData.completeCraft = true;
+        //craftData.categories = new HashSet<string>(craftData.configNode.GetValues("category"));
+        craftData.name = craftData.configNode.GetValue("ship");//gets the name
+        craftData.lastSave = file.LastWriteTime;
+        foreach (ConfigNode part in craftData.partNodes)
         {
           if (part.HasValue("istg"))
           {
             var partStage = toInt(part.GetValue("istg"));
-            if (partStage > craftStages)
-              craftStages = partStage;
+            if (partStage > craftData.stageCount)
+              craftData.stageCount = partStage;
           }
           float partCost = 0;
-          if (getPartCost(part, out partCost))
+          if (!GetPartCost(part, out partCost))
           {
-            craftCost += partCost;
+            craftData.completeCraft = false;
           }
-          else
-          {
-            completeCraft = false;
-          }
+          craftData.cost += partCost;
         }
+        craftData.isDone = true;
+        return craftData;
       }
 
-      private static bool getPartCost(ConfigNode part, out float total, bool includeFuel = true)
+      private static bool GetPartCost(ConfigNode part, out float total, bool includeFuel = true)
       {
-        string name = getPartName(part);
+        string name = GetPartName(part);
         float dryCost, fuelCost;
         total = 0;
-        var aP = getAvailablePart(name);
+        var aP = GetAvailablePart(name);
         if (aP == null)
         {
           return false;
         }
-        total = ShipConstruction.GetPartCosts(part, getAvailablePart(name), out dryCost, out fuelCost);
+        total = ShipConstruction.GetPartCosts(part, GetAvailablePart(name), out dryCost, out fuelCost);
         if (!includeFuel)
           total = dryCost;
-        return true;
+        return ResearchAndDevelopment.PartTechAvailable(aP);
       }
 
-      private static string getPartName(ConfigNode part)
+      private static string GetPartName(ConfigNode part)
       {
         string name = part.GetValue("part");
         if (name != null)
@@ -78,7 +186,7 @@ namespace KerboKatz
       }
 
       private static Dictionary<string, AvailablePart> availablePartList;
-      private static AvailablePart getAvailablePart(string partName)
+      private static AvailablePart GetAvailablePart(string partName)
       {
         if (availablePartList == null)
         {
@@ -96,7 +204,7 @@ namespace KerboKatz
         return null;
       }
 
-      public static string[] getCraftCategories(string file)
+      public static string[] GetCraftCategories(string file)
       {
         return ConfigNode.Load(file).GetValues("category");
       }

@@ -1,0 +1,60 @@
+﻿using UnityEngine;
+using UnityEngine.EventSystems;
+
+namespace KerboKatz.UI
+{
+  public class Drag : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler//, IDropHandler
+  {
+    public GameObject DragObject;
+
+    private GameObject privateDragObject;
+
+    public void OnBeginDrag(PointerEventData eventData)
+    {
+      if (privateDragObject == null)
+      {
+        privateDragObject = Instantiate(DragObject);
+        privateDragObject.transform.SetParent(GetComponentInParent<Canvas>().transform,false);
+        //var c = GetComponentInParent<Canvas>();
+        //Debug.Log("scaleFactor " + c.f);
+      }
+      else
+      {
+        privateDragObject.SetActive(true);
+      }
+    }
+
+    public void OnDrag(PointerEventData eventData)
+    {
+      var width = Screen.width / 2;
+      var height = Screen.height / 2;
+      //var rectTransform = privateDragObject.transform as RectTransform;
+      //rectTransform.
+      ///RectTransformUtility.
+      privateDragObject.transform.localPosition =new Vector2(Input.mousePosition.x- width, Input.mousePosition.y- height);
+      privateDragObject.transform.SetAsLastSibling();
+    }
+
+    public void OnEndDrag(PointerEventData eventData)
+    {
+      foreach (var droped in eventData.hovered)
+      {
+        if (droped.gameObject == gameObject)
+          continue;
+        var dropedOn = droped.GetComponent<Drop>();
+        if (dropedOn != null)
+        {
+          dropedOn.OnObjectDroped.Invoke(transform);
+          break;
+        }
+      }
+      privateDragObject.SetActive(false);
+    }
+
+    private void OnDestroy()
+    {
+      if (privateDragObject != null)
+        Destroy(privateDragObject);
+    }
+  }
+}
