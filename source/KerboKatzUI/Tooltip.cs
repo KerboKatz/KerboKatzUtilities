@@ -13,7 +13,7 @@ namespace KerboKatz.UI
     public float fadeDuration = 1;
     private Coroutine fadeInCoroutine;
 
-    private void Awake()
+    private void GetCanvas()
     {
       var canvas = transform.root.GetComponent<Canvas>();
       if (canvas == null)
@@ -30,6 +30,8 @@ namespace KerboKatz.UI
 
     public void OnPointerEnter(PointerEventData eventData)
     {
+      if (canvasTransform == null)
+        GetCanvas();
       tooltip = Instantiate(prefab);
       tooltip.transform.SetParent(canvasTransform, false);
       tooltipGroup = tooltip.GetComponent<CanvasGroup>();

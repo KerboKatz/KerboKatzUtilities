@@ -39,7 +39,7 @@ namespace KerboKatz.UI
       {
         y += offset.y;
       }
-      rect.position = new Vector3(x, y, rect.position.z);
+      rect.position = new Vector3(x - Screen.width / 2, y - Screen.height / 2, rect.position.z);
       rect.SetAsLastSibling();
     }
   }

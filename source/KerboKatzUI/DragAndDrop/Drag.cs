@@ -14,7 +14,7 @@ namespace KerboKatz.UI
       if (privateDragObject == null)
       {
         privateDragObject = Instantiate(DragObject);
-        privateDragObject.transform.SetParent(GetComponentInParent<Canvas>().transform,false);
+        privateDragObject.transform.SetParent(GetComponentInParent<Canvas>().transform, false);
         //var c = GetComponentInParent<Canvas>();
         //Debug.Log("scaleFactor " + c.f);
       }
@@ -28,10 +28,7 @@ namespace KerboKatz.UI
     {
       var width = Screen.width / 2;
       var height = Screen.height / 2;
-      //var rectTransform = privateDragObject.transform as RectTransform;
-      //rectTransform.
-      ///RectTransformUtility.
-      privateDragObject.transform.localPosition =new Vector2(Input.mousePosition.x- width, Input.mousePosition.y- height);
+      privateDragObject.transform.localPosition = new Vector2(Input.mousePosition.x - width, Input.mousePosition.y - height);
       privateDragObject.transform.SetAsLastSibling();
     }
 

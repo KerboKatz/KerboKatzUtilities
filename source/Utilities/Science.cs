@@ -19,7 +19,7 @@ namespace KerboKatz
         }
       }
 
-      public static float getScienceValue(Dictionary<string, int> experimentCount, ScienceExperiment experiment, ScienceSubject currentScienceSubject)
+      public static float GetScienceValue(Dictionary<string, int> experimentCount, ScienceExperiment experiment, ScienceSubject currentScienceSubject)
       {
         float currentScienceValue;
         if (experimentCount.ContainsKey(currentScienceSubject.id))
