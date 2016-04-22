@@ -21,6 +21,44 @@ namespace KerboKatz
   }
   public static partial class Utilities
   {
+    public static void LoopTroughAssemblies(Action<Type> CheckType)
+    {
+      var exceptions = new List<string>();
+      foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+      {
+        try
+        {
+          foreach (var type in assembly.GetTypes())
+          {
+            try
+            {
+              CheckType(type);
+            }
+            catch (Exception e)
+            {
+              exceptions.Add(type.GetType().ToString());
+              exceptions.Add(e.Message);
+              exceptions.Add(e.StackTrace);
+            }
+          }
+        }
+        catch (Exception e)
+        {
+          exceptions.Add(assembly.FullName);
+          exceptions.Add(e.Message);
+          exceptions.Add(e.StackTrace);
+        }
+      }
+      if (exceptions.Count > 0)
+      {
+        var stringBuilder = new StringBuilder();
+        foreach (var exception in exceptions)
+        {
+          stringBuilder.AppendLine(exception);
+        }
+        UnityEngine.Debug.LogWarning(stringBuilder);
+      }
+    }
     private static Version utilitiesVersion;
     public static Version GetUtilitiesVersion()
     {
@@ -63,7 +101,7 @@ namespace KerboKatz
       }
       return false;
     }
-    
+
     public static void Debug(string modName, LogMode mode, params object[] debugStrings)
     {
       if (debugStrings.Length == 0)
