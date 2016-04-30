@@ -52,7 +52,7 @@ namespace KerboKatz
 
     public void Log(params object[] debugStrings)
     {
-        Log(LogMode.Log, debugStrings);
+      Log(LogMode.Log, debugStrings);
     }
     public void Log(LogMode mode, params object[] debugStrings)
     {
@@ -78,8 +78,11 @@ namespace KerboKatz
     {
       BeforeSaveOnDestroy();
 
-      SaveUIPosition();
-      DestroyUIElements();
+      if (settings != null)
+      {
+        SaveUIPosition();
+        DestroyUIElements();
+      }
 
       AfterDestroy();
       //RemoveUiListeners();
@@ -174,6 +177,8 @@ namespace KerboKatz
 
     protected virtual UIData GetUIData(string name, bool showDebug = false)
     {
+      if (settings == null)
+        return null;
       foreach (var value in settings.uiElements)
       {
         if (showDebug)
@@ -195,7 +200,6 @@ namespace KerboKatz
           UpdateUIData(uiData);
         }
       }
-      //settings.uiElements = settings.uiElements;
       settings.Save();
     }
 
@@ -211,6 +215,17 @@ namespace KerboKatz
       for (int i = parent.childCount - 1; i >= 0; i--)
       {
         Destroy(parent.GetChild(i).gameObject);
+      }
+    }
+    protected void DeleteChildren(Transform parent, string nameMatch)
+    {
+      for (int i = parent.childCount - 1; i >= 0; i--)
+      {
+        var child = parent.GetChild(i);
+        if (child.gameObject.name == nameMatch)
+        {
+          Destroy(child.gameObject);
+        }
       }
     }
     protected C GetComponentInChild<C>(Transform content, string childName) where C : Component
@@ -258,7 +273,7 @@ namespace KerboKatz
       uiObject.text = initStatus;
       return uiObject;
     }
-    protected Toggle InitToggle(Transform content, string childName, bool initStatus, UnityAction<bool> eventListener = null)
+    protected Toggle InitToggle(Transform content, string childName, bool initStatus, UnityAction<bool> eventListener = null, bool removeAllListeners = false)
     {
       var uiObject = GetComponentInChild<Toggle>(content, childName);
       if (uiObject == null)
@@ -266,30 +281,35 @@ namespace KerboKatz
         return null;
       }
       uiObject.isOn = initStatus;
+      if (removeAllListeners)
+        uiObject.onValueChanged.RemoveAllListeners();
       if (eventListener != null)
         uiObject.onValueChanged.AddListener(eventListener);
       return uiObject;
     }
-    protected InputField InitInputField(Transform content, string childName, string initStatus, UnityAction<string> eventListener = null)
+    protected InputField InitInputField(Transform content, string childName, string initStatus, UnityAction<string> eventListener = null, bool removeAllListeners = false)
     {
       var uiObject = GetComponentInChild<InputField>(content, childName);
       if (uiObject == null)
       {
         return null;
       }
+      if (removeAllListeners)
+        uiObject.onEndEdit.RemoveAllListeners();
       if (eventListener != null)
         uiObject.onEndEdit.AddListener(eventListener);
-      //uiObject.onEndEdit
       uiObject.text = initStatus;
       return uiObject;
     }
-    protected Dropdown InitDropdown(Transform content, string childName, UnityAction<int> eventListener = null, List<string> initOptions = null)
+    protected Dropdown InitDropdown(Transform content, string childName, UnityAction<int> eventListener = null, List<string> initOptions = null, bool removeAllListeners = false)
     {
       var uiObject = GetComponentInChild<Dropdown>(content, childName);
       if (uiObject == null)
       {
         return null;
       }
+      if (removeAllListeners)
+        uiObject.onValueChanged.RemoveAllListeners();
       if (eventListener != null)
         uiObject.onValueChanged.AddListener(eventListener);
       uiObject.value = 0;
@@ -304,25 +324,29 @@ namespace KerboKatz
 
       return uiObject;
     }
-    protected Slider InitSlider(Transform content, string childName, float initStatus, UnityAction<float> eventListener = null)
+    protected Slider InitSlider(Transform content, string childName, float initStatus, UnityAction<float> eventListener = null, bool removeAllListeners = false)
     {
       var uiObject = GetComponentInChild<Slider>(content, childName);
       if (uiObject == null)
       {
         return null;
       }
+      if (removeAllListeners)
+        uiObject.onValueChanged.RemoveAllListeners();
       if (eventListener != null)
         uiObject.onValueChanged.AddListener(eventListener);
       uiObject.value = initStatus;
       return uiObject;
     }
-    protected Button InitButton(Transform content, string childName, UnityAction eventListener = null)
+    protected Button InitButton(Transform content, string childName, UnityAction eventListener = null, bool removeAllListeners = false)
     {
       var uiObject = GetComponentInChild<Button>(content, childName);
       if (uiObject == null)
       {
         return null;
       }
+      if (removeAllListeners)
+        uiObject.onClick.RemoveAllListeners();
       if (eventListener != null)
         uiObject.onClick.AddListener(eventListener);
       return uiObject;

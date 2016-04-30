@@ -30,6 +30,8 @@ namespace KerboKatz.UI
 
     public void OnPointerEnter(PointerEventData eventData)
     {
+      if (this.text.IsNullOrWhiteSpace())
+        return;
       if (canvasTransform == null)
         GetCanvas();
       tooltip = Instantiate(prefab);

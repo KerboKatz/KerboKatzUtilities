@@ -25,6 +25,7 @@ namespace KerboKatz.Assets
     }
     public static LoaderInfo Add(string path, string objectName, Action<GameObject> onAssetLoaded)
     {
+      GetBundle("kerbokatz");
       path = "file://" + KSPUtil.ApplicationRootPath + "GameData/KerboKatz/" + path + ".KerboKatzAsset";
       var loaderInfo = new LoaderInfo();
       loaderInfo.path = path;
@@ -43,12 +44,12 @@ namespace KerboKatz.Assets
       }
       return loaderInfo;
     }
-    public static T GetAsset<T>(string name, string pathInBundle = "", string dataType = "png") where T : UnityEngine.Object
+    public static T GetAsset<T>(string name, string pathInBundle = "",string bundlePath = "kerbokatz", string dataType = "png") where T : UnityEngine.Object
     {//now you are probably wondering why im going through all of this for simple icons/textures right ?
      //well kerbals assetloading takes its sweet time during startup and lots of small icons slow it down by alot! assetbundles on the other hand don't have that issue.
       StringBuilder texturePath = GetAssetPath(name, pathInBundle, dataType);
 
-      AssetBundle bundle = GetMainBundle();
+      AssetBundle bundle = GetBundle(bundlePath);
 
       return bundle.LoadAsset<T>(texturePath.ToString());
     }
@@ -65,9 +66,9 @@ namespace KerboKatz.Assets
       return texturePath;
     }
 
-    private static AssetBundle GetMainBundle()
+    private static AssetBundle GetBundle(string bundlePath)
     {
-      var path = KSPUtil.ApplicationRootPath + "GameData/KerboKatz/kerbokatz.KerboKatzAsset";
+      var path = KSPUtil.ApplicationRootPath + "GameData/KerboKatz/" + bundlePath + ".KerboKatzAsset";
       var wwwPath = "file://" + path;
 
       AssetBundle bundle;

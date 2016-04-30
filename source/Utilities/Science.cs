@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace KerboKatz
@@ -19,20 +20,34 @@ namespace KerboKatz
         }
       }
 
-      public static float GetScienceValue(Dictionary<string, int> experimentCount, ScienceExperiment experiment, ScienceSubject currentScienceSubject)
+      public static float GetScienceValue(Dictionary<string, int> experimentCount, ScienceExperiment experiment, ScienceSubject currentScienceSubject, Func<ScienceExperiment, ScienceSubject, float> GetScienceValue = null, Func<ScienceExperiment, ScienceSubject, float> GetNextScienceValue = null)
       {
         float currentScienceValue;
         if (experimentCount.ContainsKey(currentScienceSubject.id))
         {
-          currentScienceValue = ResearchAndDevelopment.GetNextScienceValue(experiment.baseValue * experiment.dataScale, currentScienceSubject) * HighLogic.CurrentGame.Parameters.Career.ScienceGainMultiplier;
+          if (GetNextScienceValue == null)
+            GetNextScienceValue = Science.GetNextScienceValue;
+          currentScienceValue = GetNextScienceValue(experiment, currentScienceSubject);
           if (experimentCount[currentScienceSubject.id] >= 2)//taken from scienceAlert to get somewhat accurate science values after the second experiment
             currentScienceValue = currentScienceValue / Mathf.Pow(4f, experimentCount[currentScienceSubject.id] - 1);
         }
         else
         {
-          currentScienceValue = ResearchAndDevelopment.GetScienceValue(experiment.baseValue * experiment.dataScale, currentScienceSubject) * HighLogic.CurrentGame.Parameters.Career.ScienceGainMultiplier;
+          if (GetScienceValue == null)
+            GetScienceValue = Science.GetScienceValue;
+          currentScienceValue = GetScienceValue(experiment, currentScienceSubject);
         }
         return currentScienceValue;
+      }
+
+      private static float GetScienceValue(ScienceExperiment experiment, ScienceSubject currentScienceSubject)
+      {
+        return ResearchAndDevelopment.GetScienceValue(experiment.baseValue * experiment.dataScale, currentScienceSubject) * HighLogic.CurrentGame.Parameters.Career.ScienceGainMultiplier;
+      }
+
+      private static float GetNextScienceValue(ScienceExperiment experiment, ScienceSubject currentScienceSubject)
+      {
+        return ResearchAndDevelopment.GetNextScienceValue(experiment.baseValue * experiment.dataScale, currentScienceSubject) * HighLogic.CurrentGame.Parameters.Career.ScienceGainMultiplier;
       }
     }
   }

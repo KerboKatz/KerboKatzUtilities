@@ -7,11 +7,10 @@ using UnityEngine;
 namespace KerboKatz
 {
   [Serializable]
-  public class SettingsBase<T> where T : SettingsBase<T>,new()
+  public class SettingsBase<T> where T : SettingsBase<T>, new()
   {
     public bool debug;
     public float uiFadeSpeed = 0.25f;
-    //public Vector3 uiPosition;
     public List<UIData> uiElements = new List<UIData>();
 
     private string settingsPath;
@@ -26,25 +25,36 @@ namespace KerboKatz
       }
       var settingsFile = settingsPath + file + ".xml";
       var newSettings = Load(settingsFile);
-      if(newSettings == null)
+      if (newSettings == null)
       {
         newSettings = new T();
       }
       newSettings.settingsFile = settingsFile;
       newSettings.settingsPath = settingsPath;
+      newSettings.OnLoaded();
       return newSettings;
     }
+
+    protected virtual void OnLoaded()
+    {
+    }
+
     public void Save()
     {
       if (!Directory.Exists(settingsPath))
       {
         Directory.CreateDirectory(settingsPath);
       }
+      OnSave();
       var serializer = new XmlSerializer(typeof(T));
       using (var stream = new FileStream(settingsFile, FileMode.Create))
       {
         serializer.Serialize(stream, this);
       }
+    }
+    protected virtual void OnSave()
+    {
+
     }
 
     private static T Load(string settingsFile)
