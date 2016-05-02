@@ -10,6 +10,7 @@ using UnityEngine.UI;
 using KerboKatz.Assets;
 using System.Text;
 using KerboKatz.UI;
+using System.Diagnostics;
 
 namespace KerboKatz
 {
@@ -21,14 +22,12 @@ namespace KerboKatz
     public string tooltip { get; set; }
     protected Version requiresUtilities;
     Dictionary<UnityEngine.Object, Coroutine> fadeCoroutines = new Dictionary<UnityEngine.Object, Coroutine>();
-    //private List<UIData> uiElements = new List<UIData>();
 
     protected void LoadSettings(string path, string file)
     {
       if (settings != null)
         DestroyUIElements();
       settings = SettingsBase<T>.LoadSettings(path, file);
-      //debug = settings.debug;
     }
     protected virtual void Awake()
     {
@@ -80,12 +79,23 @@ namespace KerboKatz
 
       if (settings != null)
       {
-        SaveUIPosition();
+        SaveSettings();
         DestroyUIElements();
       }
 
       AfterDestroy();
-      //RemoveUiListeners();
+    }
+    protected void SaveSettings()
+    {
+      if (settings != null)
+      {
+        var sw = new Stopwatch();
+        sw.Start();
+        SaveUIPosition();
+        var uiTime = sw.Elapsed.TotalMilliseconds;
+        settings.Save();
+        Log("Saving settings. Updating UI took: ", uiTime, ". Total: ", sw.Elapsed.TotalMilliseconds);
+      }
     }
 
     private void DestroyUIElements()
@@ -118,7 +128,7 @@ namespace KerboKatz
       {
         return;
       }
-      UIData uiWindow = GetUIData(requestedAsset.name, true);
+      UIData uiWindow = GetUIData(requestedAsset.name);
       if (uiWindow != null)
       {
         if (uiWindow.gameObject != null)
@@ -175,19 +185,17 @@ namespace KerboKatz
     {
     }
 
-    protected virtual UIData GetUIData(string name, bool showDebug = false)
+    protected virtual UIData GetUIData(string name)
     {
       if (settings == null)
         return null;
       foreach (var value in settings.uiElements)
       {
-        if (showDebug)
-          Debug.Log("Looking for: " + name + ". Found:" + value.name);
+        Log("Looking for: ", name, ". Found:", value.name);
         if (value.name == name)
           return value;
       }
-      if (showDebug)
-        Debug.Log("Looking for: " + name + ". Found: Nothing");
+      Log("Looking for: ", name, ". Found: Nothing");
       return null;
     }
 
@@ -200,7 +208,6 @@ namespace KerboKatz
           UpdateUIData(uiData);
         }
       }
-      settings.Save();
     }
 
     private static void UpdateUIData(UIData uiData)
@@ -320,7 +327,6 @@ namespace KerboKatz
       var stockCanvas = UIMasterController.Instance.appCanvas;
       //fix dropdown sorting layer
       GetComponentInChild<Canvas>(uiObject.transform, "Template").sortingLayerID = UIMasterController.Instance.appCanvas.sortingLayerID;
-      //uiObject.transform.FindChild("Template").GetComponent<Canvas>().sortingLayerID = stockCanvas.sortingLayerID;
 
       return uiObject;
     }

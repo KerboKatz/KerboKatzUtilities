@@ -110,7 +110,7 @@ namespace KerboKatz.Toolbar
         {
           FadeCanvasGroup(canvasGroup, 0, settings.uiFadeSpeed);
         }
-        settings.Save();
+        SaveSettings();
       }
     }
     public void Add(IToolbar data)
