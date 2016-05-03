@@ -3,7 +3,7 @@ using UnityEngine.EventSystems;
 
 namespace KerboKatz.UI
 {
-  public class Drag : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler//, IDropHandler
+  public class Drag : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
   {
     public GameObject DragObject;
 
@@ -15,8 +15,6 @@ namespace KerboKatz.UI
       {
         privateDragObject = Instantiate(DragObject);
         privateDragObject.transform.SetParent(GetComponentInParent<Canvas>().transform, false);
-        //var c = GetComponentInParent<Canvas>();
-        //Debug.Log("scaleFactor " + c.f);
       }
       else
       {

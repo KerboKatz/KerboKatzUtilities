@@ -5,6 +5,7 @@ using System.Text;
 using KerboKatz.Extensions;
 using UnityEngine;
 using System.Collections;
+using System.IO;
 
 namespace KerboKatz.Assets
 {
@@ -26,7 +27,8 @@ namespace KerboKatz.Assets
     public static LoaderInfo Add(string path, string objectName, Action<GameObject> onAssetLoaded)
     {
       GetBundle("kerbokatz");
-      path = "file://" + KSPUtil.ApplicationRootPath + "GameData/KerboKatz/" + path + ".KerboKatzAsset";
+      var dataPath = GetPath(path);
+      path = GetWWWPath(dataPath);
       var loaderInfo = new LoaderInfo();
       loaderInfo.path = path;
       loaderInfo.objectName = objectName;
@@ -44,13 +46,14 @@ namespace KerboKatz.Assets
       }
       return loaderInfo;
     }
-    public static T GetAsset<T>(string name, string pathInBundle = "",string bundlePath = "kerbokatz", string dataType = "png") where T : UnityEngine.Object
+    public static T GetAsset<T>(string name, string pathInBundle = "", string bundlePath = "kerbokatz", string dataType = "png") where T : UnityEngine.Object
     {//now you are probably wondering why im going through all of this for simple icons/textures right ?
      //well kerbals assetloading takes its sweet time during startup and lots of small icons slow it down by alot! assetbundles on the other hand don't have that issue.
+
       StringBuilder texturePath = GetAssetPath(name, pathInBundle, dataType);
 
       AssetBundle bundle = GetBundle(bundlePath);
-
+      Log("Bundle loaded. Accessing file at: ", texturePath.ToString());
       return bundle.LoadAsset<T>(texturePath.ToString());
     }
 
@@ -68,17 +71,33 @@ namespace KerboKatz.Assets
 
     private static AssetBundle GetBundle(string bundlePath)
     {
-      var path = KSPUtil.ApplicationRootPath + "GameData/KerboKatz/" + bundlePath + ".KerboKatzAsset";
-      var wwwPath = "file://" + path;
-
+      var dataPath = GetPath(bundlePath);
+      var wwwPath = GetWWWPath(dataPath);
+      Log("Path is: ", dataPath, " File exists: ", File.Exists(dataPath), " WWWPath is: ", wwwPath);
       AssetBundle bundle;
       if (!CheckBundle(wwwPath, out bundle))
       {//when kerbal upgrades to unity 5.3 or higher this will be replaced by AssetBundle.LoadFromFile which can load compressed assetbundles as well
-        bundle = AssetBundle.CreateFromFile(path);
+        Log("Couldn't find bundle. Loading from file!");
+        bundle = AssetBundle.CreateFromFile(dataPath);
         cachedAssetBundles.Add(wwwPath, bundle);
       }
 
       return bundle;
+    }
+
+    private static string GetPath(string bundlePath)
+    {
+      var path = Path.Combine(KSPUtil.ApplicationRootPath, "GameData/KerboKatz/");
+      path = Path.Combine(path, bundlePath + ".KerboKatzAsset");
+      path = Path.GetFullPath(path);
+      var directory = Path.GetDirectoryName(path);
+      var fileName = Path.GetFileNameWithoutExtension(path).ToLower();
+      path = Path.Combine(directory, fileName + ".KerboKatzAsset");
+      return path;
+    }
+    private static string GetWWWPath(string dataPath)
+    {
+      return "file://" + dataPath;
     }
 
     private static bool CheckBundle(string wwwPath, out AssetBundle bundle)
@@ -89,7 +108,7 @@ namespace KerboKatz.Assets
         if (foundBundle)
         {
           cachedAssetBundles.Remove(wwwPath);
-          Debug.LogError("[KerboKatzAssetLoader] bundle is null!");
+          Log("Bundle is null!");
         }
         return false;
       }
@@ -121,7 +140,7 @@ namespace KerboKatz.Assets
           if (assetBundle == null)
           {
             isRuning.Remove(path);
-            Debug.LogError("[" + modName + "] bundle loaded as null!:" + path);
+            Log("Bundle loaded as null!: ", path);
             yield break;
           }
           cachedAssetBundles.Add(path, assetBundle);
@@ -153,6 +172,10 @@ namespace KerboKatz.Assets
       }
       loaderInfo.onAssetLoaded(loadedAsset);
       loaderInfo.isReady = true;
+    }
+    private static new void Log(params object[] debugStrings)
+    {
+      Utilities.Debug("KerboKatzAssetLoader", debugStrings);
     }
   }
 }
