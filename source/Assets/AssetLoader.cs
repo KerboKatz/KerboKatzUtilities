@@ -15,6 +15,8 @@ namespace KerboKatz.Assets
     private static Dictionary<string, List<LoaderInfo>> pathsToLoad = new Dictionary<string, List<LoaderInfo>>();
     private static Dictionary<string, AssetBundle> cachedAssetBundles = new Dictionary<string, AssetBundle>();
     HashSet<string> isRuning = new HashSet<string>();
+    private static EmptySettings staticSettings;
+
     public AssetLoader()
     {
       modName = "KerboKatzAssetLoader";
@@ -23,6 +25,8 @@ namespace KerboKatz.Assets
     public override void OnAwake()
     {
       DontDestroyOnLoad(this);
+      LoadSettings("", "AssetLoadSettings");
+      staticSettings = settings;
     }
     public static LoaderInfo Add(string path, string objectName, Action<GameObject> onAssetLoaded)
     {
@@ -152,7 +156,6 @@ namespace KerboKatz.Assets
         }
         pathsToLoad.Remove(path);
         isRuning.Remove(path);
-        //list.Clear();
       }
     }
 
@@ -167,7 +170,7 @@ namespace KerboKatz.Assets
         {
           sb.AppendLine(asset);
         }
-        Debug.LogError("[KerboKatzAssetLoader] Failed to load asset. Does the asset(" + loaderInfo.objectName + ") exist in the specified bundle(" + loaderInfo.path + ") ? But found:" + sb.ToString());
+        Log("Failed to load asset. Does the asset(", loaderInfo.objectName, ") exist in the specified bundle(", loaderInfo.path, ") ? But found:", sb.ToString());
         return;
       }
       loaderInfo.onAssetLoaded(loadedAsset);
@@ -175,7 +178,8 @@ namespace KerboKatz.Assets
     }
     private static new void Log(params object[] debugStrings)
     {
-      Utilities.Debug("KerboKatzAssetLoader", debugStrings);
+      if (staticSettings == null || staticSettings.debug)
+        Utilities.Debug("KerboKatzAssetLoader", debugStrings);
     }
   }
 }

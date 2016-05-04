@@ -23,6 +23,8 @@ namespace KerboKatz.Toolbar
     private Transform content;
     private Transform template;
     string toolbarUIName;
+    private Dictionary<string, Image> modImages = new Dictionary<string, Image>();
+
     public ToolbarBase()
     {
       modName = "KerboKatzToolbar";
@@ -138,14 +140,12 @@ namespace KerboKatz.Toolbar
         {
           if (!UpdateIcon(false))
           {
-            SetIcon(AssetLoader.GetAsset<Sprite>("KerboKatzToolbar","Icons"));//Utilities.GetTexture("KerboKatzToolbar", "Textures"));
+            SetIcon(AssetLoader.GetAsset<Sprite>("KerboKatzToolbar", "Icons"));//Utilities.GetTexture("KerboKatzToolbar", "Textures"));
           }
           else
           {
             FadeCanvasGroup(mainUIWindow.canvasGroup, 0, settings.uiFadeSpeed);
             settings.showToolbar = false;
-            //mainUIWindow.gameObject.SetActive(false);
-            //mainUIWindow.canvasGroup.alpha = 0;
           }
           button.VisibleInScenes = ApplicationLauncher.AppScenes.ALWAYS;
         }
@@ -168,6 +168,18 @@ namespace KerboKatz.Toolbar
         instance.UpdateIcons();
       }
       return false;
+    }
+    public static void UpdateIcon(string modName, Texture2D newIcon)
+    {
+      UpdateIcon(modName, Sprite.Create(newIcon, new Rect(Vector2.zero, new Vector2(newIcon.width, newIcon.height)), new Vector2(0.5f, 0.5f)));
+    }
+    public static void UpdateIcon(string modName, Sprite newIcon)
+    {
+      Image imageObj;
+      if (instance.modImages.TryGetValue(modName, out imageObj))
+      {
+        imageObj.sprite = newIcon;
+      }
     }
 
     private void UpdateIcons()
@@ -198,6 +210,7 @@ namespace KerboKatz.Toolbar
     private void UpdateVisibleList()
     {
       visibleInThisScene.Clear();
+      modImages.Clear();
       DeleteChildren(content);
       foreach (var currentMod in modules)
       {
@@ -207,7 +220,8 @@ namespace KerboKatz.Toolbar
           newToolbarOption.SetActive(true);
           newToolbarOption.transform.SetParent(content, false);
           newToolbarOption.transform.FindChild("Text").GetComponent<Text>().text = currentMod.displayName;
-          InitImage(newToolbarOption.transform, "Image", currentMod.icon);
+          var image = InitImage(newToolbarOption.transform, "Image", currentMod.icon);
+          modImages.Add(currentMod.modName, image);
           //newToolbarOption.transform.FindChild("Image").GetComponent<Image>().sprite = Sprite.Create(currentMod.icon, new Rect(Vector2.zero, new Vector2(38, 38)), new Vector2(0.5f, 0.5f));
 
           newToolbarOption.GetComponent<Button>().onClick.AddListener(currentMod.onClick);
