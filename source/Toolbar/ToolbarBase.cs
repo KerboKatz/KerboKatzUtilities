@@ -180,6 +180,11 @@ namespace KerboKatz.Toolbar
       {
         imageObj.sprite = newIcon;
       }
+
+      if (instance.visibleInThisScene.Count == 1)
+      {
+        instance.SetIcon(instance.visibleInThisScene[0].icon);
+      }
     }
 
     private void UpdateIcons()
