@@ -1,9 +1,6 @@
 ﻿using KerboKatz.Assets;
-using KerboKatz.Toolbar;
 using KSP.UI.Screens;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -22,7 +19,7 @@ namespace KerboKatz.Toolbar
     private bool isUpdateRequired;
     private Transform content;
     private Transform template;
-    string toolbarUIName;
+    private string toolbarUIName;
     private Dictionary<string, Image> modImages = new Dictionary<string, Image>();
 
     public ToolbarBase()
@@ -31,6 +28,7 @@ namespace KerboKatz.Toolbar
       toolbarUIName = "KerboKatzToolbar";
       Log("Init done!");
     }
+
     public override void OnAwake()
     {
       instance = this;
@@ -84,6 +82,7 @@ namespace KerboKatz.Toolbar
     }
 
     #region UI
+
     protected override void OnUIElemntInit(UIData uiWindow)
     {
       var prefabWindow = uiWindow.gameObject.transform as RectTransform;
@@ -92,7 +91,8 @@ namespace KerboKatz.Toolbar
       template.SetParent(prefabWindow);
       template.gameObject.SetActive(false);
     }
-    #endregion
+
+    #endregion UI
 
     private void OnToolbar()
     {
@@ -115,17 +115,20 @@ namespace KerboKatz.Toolbar
         SaveSettings();
       }
     }
+
     public void Add(IToolbar data)
     {
       Log("ToolbarBase: Adding ", data.GetType());
       modules.Add(data);
       isUpdateRequired = true;
     }
+
     public void Remove(IToolbar data)
     {
       modules.Remove(data);
       isUpdateRequired = true;
     }
+
     private void Update()
     {
       var mainUIWindow = GetUIData(toolbarUIName);
@@ -156,6 +159,7 @@ namespace KerboKatz.Toolbar
         isUpdateRequired = false;
       }
     }
+
     public static bool UpdateIcon(bool updateAll = true)
     {
       if (instance.visibleInThisScene.Count == 1)
@@ -169,10 +173,12 @@ namespace KerboKatz.Toolbar
       }
       return false;
     }
+
     public static void UpdateIcon(string modName, Texture2D newIcon)
     {
-      UpdateIcon(modName, Sprite.Create(newIcon, new Rect(Vector2.zero, new Vector2(newIcon.width, newIcon.height)), new Vector2(0.5f, 0.5f)));
+      UpdateIcon(modName, GetSprite(newIcon));
     }
+
     public static void UpdateIcon(string modName, Sprite newIcon)
     {
       Image imageObj;

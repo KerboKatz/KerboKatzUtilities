@@ -21,11 +21,11 @@ namespace KerboKatz
       }
     }
 
-
     private Queue<Stopwatch> frames = new Queue<Stopwatch>();
     public static int currentFPS { get; private set; }
     public static int maxFPS { get; private set; }
     public static int minFPS { get; private set; }
+
     private void Update()
     {
       var frameSW = new Stopwatch();
@@ -57,6 +57,7 @@ namespace KerboKatz
       DontDestroyOnLoad(this);
       _instance = this;
     }
+
     public void ResetMinMax()
     {
       minFPS = int.MaxValue;

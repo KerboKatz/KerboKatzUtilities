@@ -1,16 +1,15 @@
-﻿using KerboKatz.Extensions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using UnityEngine;
 
 namespace KerboKatz
 {
-
   [Flags]
   public enum LogMode
   {
@@ -19,8 +18,22 @@ namespace KerboKatz
     Error = 4,
     Exception = 8,
   }
+
   public static partial class Utilities
   {
+    public static string GetMD5Hash(string input)
+    {
+      MD5 md5 = MD5.Create();
+      byte[] inputBytes = Encoding.ASCII.GetBytes(input);
+      byte[] hash = md5.ComputeHash(inputBytes);
+      StringBuilder sb = new StringBuilder();
+      for (int i = 0; i < hash.Length; i++)
+      {
+        sb.Append(hash[i].ToString("x2"));
+      }
+      return sb.ToString();
+    }
+
     public static void LoopTroughAssemblies(Action<Type> CheckType)
     {
       var exceptions = new List<string>();
@@ -59,7 +72,9 @@ namespace KerboKatz
         UnityEngine.Debug.LogWarning(stringBuilder);
       }
     }
+
     private static Version utilitiesVersion;
+
     public static Version GetUtilitiesVersion()
     {
       if (utilitiesVersion == null)
@@ -147,6 +162,7 @@ namespace KerboKatz
     }
 
     #region numbermethods
+
     public static float round(float number, float n = 2)
     {
       n = Mathf.Pow(10, n);
@@ -190,6 +206,7 @@ namespace KerboKatz
     #endregion numbermethods
 
     #region timemethods
+
     public static double getUnixTimestamp()
     {
       return (DateTime.Now - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Local)).TotalSeconds;
@@ -201,10 +218,72 @@ namespace KerboKatz
     }
 
     #endregion timemethods
+
     /*public static Texture2D GetTexture(string file, string path, bool asNormal = false)
     {
       return GameDatabase.Instance.GetTexture("KerboKatz/" + path + "/" + file, asNormal);
     }*/
+
+    #region taken from http://www.codeproject.com/Articles/22517/Natural-Sort-Comparer
+
+    private static Dictionary<string, string[]> table = new Dictionary<string, string[]>();
+
+    public static int Compare(string x, string y)
+    {
+      if (x == y)
+      {
+        return 0;
+      }
+      string[] x1, y1;
+      if (!table.TryGetValue(x, out x1))
+      {
+        x1 = Regex.Split(x.Replace(" ", ""), "([0-9]+)");
+        table.Add(x, x1);
+      }
+      if (!table.TryGetValue(y, out y1))
+      {
+        y1 = Regex.Split(y.Replace(" ", ""), "([0-9]+)");
+        table.Add(y, y1);
+      }
+
+      for (int i = 0; i < x1.Length && i < y1.Length; i++)
+      {
+        if (x1[i] != y1[i])
+        {
+          return PartCompare(x1[i], y1[i]);
+        }
+      }
+      if (y1.Length > x1.Length)
+      {
+        return 1;
+      }
+      else if (x1.Length > y1.Length)
+      {
+        return -1;
+      }
+      else
+      {
+        return 0;
+      }
+    }
+
+    private static int PartCompare(string left, string right)
+    {
+      int x, y;
+      if (!int.TryParse(left, out x))
+      {
+        return left.CompareTo(right);
+      }
+
+      if (!int.TryParse(right, out y))
+      {
+        return left.CompareTo(right);
+      }
+
+      return x.CompareTo(y);
+    }
+
+    #endregion taken from http://www.codeproject.com/Articles/22517/Natural-Sort-Comparer
 
     public static string[] reverseArray(string[] arrayToReverse)
     {

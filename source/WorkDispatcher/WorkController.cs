@@ -5,8 +5,8 @@ using UnityEngine;
 
 namespace KerboKatzUtilities.WorkDispatcher
 {
-  [KSPAddon( KSPAddon.Startup.Instantly,true)]
-  public class WorkController:MonoBehaviour
+  [KSPAddon(KSPAddon.Startup.Instantly, true)]
+  public class WorkController : MonoBehaviour
   {
     public enum CPULoad
     {
@@ -17,6 +17,7 @@ namespace KerboKatzUtilities.WorkDispatcher
     }
 
     private static WorkController _instance;
+
     public static WorkController instance
     {
       get
@@ -29,6 +30,7 @@ namespace KerboKatzUtilities.WorkDispatcher
         return _instance;
       }
     }
+
     public static AutoResetEvent waitHandle = new AutoResetEvent(false);
 
     public static bool run = false;
@@ -48,7 +50,7 @@ namespace KerboKatzUtilities.WorkDispatcher
       }
     }
 
-    void Awake()
+    private void Awake()
     {
       DontDestroyOnLoad(this);
       _instance = this;
@@ -83,6 +85,7 @@ namespace KerboKatzUtilities.WorkDispatcher
       }
       return null;
     }
+
     private bool TryDequeue(out Action work)
     {
       lock (tasks)
@@ -121,6 +124,7 @@ namespace KerboKatzUtilities.WorkDispatcher
       }
       threads = threadsList.ToArray();
     }
+
     private void OnDestroy()
     {
       run = false;

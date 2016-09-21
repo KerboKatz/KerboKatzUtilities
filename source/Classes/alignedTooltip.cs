@@ -7,6 +7,7 @@
     public float nameSize;
     public float valueSize;
     public float totalSize;
+
     public alignedTooltip(string name, string value, float nameSize, float valueSize, float thisSize)
     {
       this.name = name;

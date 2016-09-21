@@ -7,6 +7,6 @@ namespace KerboKatz.UI
   {
     public class TransformEvent : UnityEvent<Transform> { }
 
-    public TransformEvent OnObjectDroped = new TransformEvent();
+    public TransformEvent onObjectDroped = new TransformEvent();
   }
 }

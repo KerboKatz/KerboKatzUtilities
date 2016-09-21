@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace KerboKatz.Extensions
 {
   public static class StringExtensions
   {
-
     public static float ToFloat(this string String)
     {
       float f;
@@ -17,6 +13,7 @@ namespace KerboKatz.Extensions
       }
       return 0;
     }
+
     public static int ToInt(this string String)
     {
       int f;
@@ -26,7 +23,9 @@ namespace KerboKatz.Extensions
       }
       return 0;
     }
+
     #region http://stackoverflow.com/a/444818
+
     public static bool Contains(this string source, string toCheck, StringComparison comp = StringComparison.OrdinalIgnoreCase)
     {
       return source.IndexOf(toCheck, comp) >= 0;

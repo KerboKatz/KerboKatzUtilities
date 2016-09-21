@@ -5,10 +5,12 @@ using System.IO;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.UI;
 
 namespace KerboKatz
 {
   public class CraftDataEvent : UnityEvent<CraftData> { }
+
   public class CraftData
   {
     public string name;
@@ -16,8 +18,10 @@ namespace KerboKatz
     public int partCount;
     public int stageCount;
     public float cost;
+
     //public HashSet<string> categories = new HashSet<string>();
     public DateTime lastSave;
+
     public bool isDone;
     public Texture2D thumbnail;
     public CraftDataEvent OnSaveRequest = new CraftDataEvent();
@@ -25,12 +29,18 @@ namespace KerboKatz
 
     public ConfigNode configNode;
 
-    public DropDownMultiSelect MultiSelect;
-    public GameObject UIObject;
+    //public GameObject UIObject;
     public FileInfo fileInfo;
+
     public DirectoryInfo directoryInfo;
 
     private string _path;
+    public InputField nameInputField;
+    public GameObject gameObject;
+    public UI.ContextMenu contextMenu;
+    public ContextMenuOption contextMenuCopy;
+    public bool thumbnailLoaded;
+
     public string path
     {
       get
@@ -78,6 +88,7 @@ namespace KerboKatz
         }
       }
     }*/
+
     public override string ToString()
     {
       var sb = new StringBuilder();
@@ -100,6 +111,7 @@ namespace KerboKatz
       return sb.ToString();
     }
   }
+
   public static partial class Utilities
   {
     public static partial class Craft
@@ -170,7 +182,7 @@ namespace KerboKatz
         {
           return false;
         }
-        total = ShipConstruction.GetPartCosts(part, GetAvailablePart(name), out dryCost, out fuelCost);
+        total = ShipConstruction.GetPartCosts(part, aP, out dryCost, out fuelCost);
         if (!includeFuel)
           total = dryCost;
         return ResearchAndDevelopment.PartTechAvailable(aP);
@@ -186,6 +198,7 @@ namespace KerboKatz
       }
 
       private static Dictionary<string, AvailablePart> availablePartList;
+
       private static AvailablePart GetAvailablePart(string partName)
       {
         if (availablePartList == null)

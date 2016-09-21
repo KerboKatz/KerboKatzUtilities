@@ -2,6 +2,7 @@
 using KSP.UI.Screens;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using UnityEngine;
 
 namespace KerboKatz
@@ -12,6 +13,7 @@ namespace KerboKatz
     {
       return path.FullName.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
     }
+
     public static void setToZero(this RectOffset offset)
     {
       offset.left = 0;
@@ -20,14 +22,20 @@ namespace KerboKatz
       offset.top = 0;
     }
 
+    public static void Clear(this StringBuilder sb)
+    {
+      sb.Length = 0;
+      //sb.Remove(0, sb.Length);
+    }
+
     /**
      * since .net 3.5 doesn't have has flag and i needed something like that i implemented this
      */
+
     public static bool HasFlag(this ApplicationLauncher.AppScenes source, ApplicationLauncher.AppScenes flag)
     {
       return (source & flag) == flag;
     }
-    
 
     public static Rect moveToCursor(this Rect rect, float offsetX = 10, float offsetY = 10)
     {
@@ -100,6 +108,7 @@ namespace KerboKatz
     }
 
     private static Dictionary<AxisBinding, AxisBindingStorage> AxisBindingStorage = new Dictionary<AxisBinding, AxisBindingStorage>();
+
     public static void saveDefault(this AxisBinding AxisBinding)
     {
       if (!AxisBindingStorage.ContainsKey(AxisBinding))

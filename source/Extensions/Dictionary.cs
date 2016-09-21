@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace KerboKatz.Extensions
 {
@@ -13,6 +10,7 @@ namespace KerboKatz.Extensions
       dictionary.TryGetOrAdd(key, out value);
       return value;
     }
+
     public static bool TryGetOrAdd<K, V>(this Dictionary<K, V> dictionary, K key, out V value) where V : class, new()
     {
       if (!dictionary.TryGetValue(key, out value))

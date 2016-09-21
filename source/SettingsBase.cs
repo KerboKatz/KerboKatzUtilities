@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Xml.Serialization;
-using UnityEngine;
 
 namespace KerboKatz
 {
@@ -52,9 +51,9 @@ namespace KerboKatz
         serializer.Serialize(stream, this);
       }
     }
+
     protected virtual void OnSave()
     {
-
     }
 
     private static T Load(string settingsFile)

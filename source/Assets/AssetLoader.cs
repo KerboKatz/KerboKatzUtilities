@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using KerboKatz.Extensions;
-using UnityEngine;
+﻿using KerboKatz.Extensions;
+using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
+using System.Text;
+using UnityEngine;
 
 namespace KerboKatz.Assets
 {
@@ -14,7 +13,7 @@ namespace KerboKatz.Assets
   {
     private static Dictionary<string, List<LoaderInfo>> pathsToLoad = new Dictionary<string, List<LoaderInfo>>();
     private static Dictionary<string, AssetBundle> cachedAssetBundles = new Dictionary<string, AssetBundle>();
-    HashSet<string> isRuning = new HashSet<string>();
+    private HashSet<string> isRuning = new HashSet<string>();
     private static EmptySettings staticSettings;
 
     public AssetLoader()
@@ -22,12 +21,14 @@ namespace KerboKatz.Assets
       modName = "KerboKatzAssetLoader";
       Log("Init done!");
     }
+
     public override void OnAwake()
     {
       DontDestroyOnLoad(this);
       LoadSettings("", "AssetLoadSettings");
       staticSettings = settings;
     }
+
     public static LoaderInfo Add(string path, string objectName, Action<GameObject> onAssetLoaded)
     {
       GetBundle("kerbokatz");
@@ -50,6 +51,7 @@ namespace KerboKatz.Assets
       }
       return loaderInfo;
     }
+
     public static T GetAsset<T>(string name, string pathInBundle = "", string bundlePath = "kerbokatz", string dataType = "png") where T : UnityEngine.Object
     {//now you are probably wondering why im going through all of this for simple icons/textures right ?
      //well kerbals assetloading takes its sweet time during startup and lots of small icons slow it down by alot! assetbundles on the other hand don't have that issue.
@@ -99,6 +101,7 @@ namespace KerboKatz.Assets
       path = Path.Combine(directory, fileName + ".KerboKatzAsset");
       return path;
     }
+
     private static string GetWWWPath(string dataPath)
     {
       return "file://" + dataPath;
@@ -119,7 +122,7 @@ namespace KerboKatz.Assets
       return true;
     }
 
-    void Update()
+    private void Update()
     {
       foreach (var list in pathsToLoad)
       {
@@ -161,7 +164,6 @@ namespace KerboKatz.Assets
 
     private static void SetLoaderReady(LoaderInfo loaderInfo, AssetBundle assetBundle)
     {
-
       var loadedAsset = assetBundle.LoadAsset<GameObject>(loaderInfo.objectName);
       if (loadedAsset == null)
       {
@@ -176,6 +178,7 @@ namespace KerboKatz.Assets
       loaderInfo.onAssetLoaded(loadedAsset);
       loaderInfo.isReady = true;
     }
+
     private static new void Log(params object[] debugStrings)
     {
       if (staticSettings == null || staticSettings.debug)

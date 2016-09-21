@@ -13,6 +13,7 @@ namespace KerboKatz.Classes
     public string partTooltip;
     public string scienceTooltip;
     public string crewTooltip;
+
     public vesselInfo(Dictionary<string, partInfo> partInfo, Dictionary<string, resourceInfo> resourceInfo, List<scienceInfo> scienceInfo, List<ProtoCrewMember> crewInfo, importantInfo importantInfo)
     {
       this.partInfo = partInfo;
@@ -28,6 +29,7 @@ namespace KerboKatz.Classes
     public string name;
     public float cost;
     public float amount;
+
     public resourceInfo(string name, float cost, float amount)
     {
       this.name = name;
@@ -41,6 +43,7 @@ namespace KerboKatz.Classes
     public string name;
     public float cost;
     public int amount = 1;
+
     public partInfo(string name, float cost)
     {
       this.name = name;
@@ -54,6 +57,7 @@ namespace KerboKatz.Classes
     public float science;
     public string title;
     public float data;
+
     public scienceInfo(ScienceSubject subject, float science, string title, float data)
     {
       this.subject = subject;
@@ -72,6 +76,7 @@ namespace KerboKatz.Classes
     public float crewCount;
     public bool recover;
     public float distanceModifier;
+
     public importantInfo(Vessel vessel, string vesselName, float totalCost, float totalScience, float crewCount, float distanceModifier, bool recover)
     {
       this.vessel = vessel;
@@ -90,6 +95,7 @@ namespace KerboKatz.Classes
     public string name;
     public Action callback;
     public bool init;
+
     public vesselTypes(VesselType vesselType, string name, bool show, Action callback)
     {
       this.vesselType = vesselType;

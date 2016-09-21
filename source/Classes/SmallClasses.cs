@@ -6,6 +6,7 @@ namespace KerboKatz.Classes
   {
     public KeyCode primary;
     public KeyCode secondary;
+
     public KeyBindingStorage(KeyCode primary, KeyCode secondary)
     {
       this.primary = primary;
@@ -17,6 +18,7 @@ namespace KerboKatz.Classes
   {
     public float primaryScale;
     public float secondaryScale;
+
     public AxisBindingStorage(float scale, float sensitivity)
     {
       this.primaryScale = scale;

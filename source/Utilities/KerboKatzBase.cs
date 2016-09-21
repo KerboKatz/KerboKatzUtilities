@@ -1,16 +1,11 @@
-﻿using KerboKatz.Extensions;
-using KSP.UI;
-using KSP.UI.Screens;
+﻿using KerboKatz.Assets;
+using KerboKatz.UI;
 using System;
-using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
-using KerboKatz.Assets;
-using System.Text;
-using KerboKatz.UI;
-using System.Diagnostics;
 
 namespace KerboKatz
 {
@@ -21,7 +16,7 @@ namespace KerboKatz
     public string displayName { get; set; }
     public string tooltip { get; set; }
     protected Version requiresUtilities;
-    Dictionary<UnityEngine.Object, Coroutine> fadeCoroutines = new Dictionary<UnityEngine.Object, Coroutine>();
+    private Dictionary<UnityEngine.Object, Coroutine> fadeCoroutines = new Dictionary<UnityEngine.Object, Coroutine>();
 
     protected void LoadSettings(string path, string file)
     {
@@ -29,6 +24,7 @@ namespace KerboKatz
         DestroyUIElements();
       settings = SettingsBase<T>.LoadSettings(path, file);
     }
+
     protected virtual void Awake()
     {
       if (!Utilities.CheckUtilitiesSupport(requiresUtilities, modName))
@@ -53,6 +49,7 @@ namespace KerboKatz
     {
       Log(LogMode.Log, debugStrings);
     }
+
     public void Log(LogMode mode, params object[] debugStrings)
     {
       if (settings == null || settings.debug)
@@ -73,6 +70,7 @@ namespace KerboKatz
       }
       GameEvents.onGameSceneLoadRequested.Remove(sceneLoad);
     }
+
     protected virtual void OnDestroy()
     {
       BeforeSaveOnDestroy();
@@ -85,6 +83,7 @@ namespace KerboKatz
 
       AfterDestroy();
     }
+
     protected void SaveSettings()
     {
       if (settings != null)
@@ -116,7 +115,9 @@ namespace KerboKatz
     protected virtual void AfterDestroy()
     {
     }
+
     #region UI
+
     protected void LoadUI(string objectName, string bundle = "kerbokatz")
     {
       AssetLoader.Add(bundle, objectName, AssetLoaded);
@@ -163,7 +164,7 @@ namespace KerboKatz
       if (panelDrager != null)
         panelDrager.ClampToWindow();
 
-      uiWindow.gameObject.transform.SetParent(UIMasterController.Instance.appCanvas.transform, false);
+      uiWindow.gameObject.transform.SetParent(CanvasController.instance.canvas.transform, false);
       uiWindow.canvasGroup = uiWindow.gameObject.GetComponent<CanvasGroup>();
 
       if (uiWindow.position != Vector3.zero)
@@ -217,6 +218,7 @@ namespace KerboKatz
       uiData.position = uiData.gameObject.transform.localPosition;
       uiData.active = uiData.gameObject.activeSelf;
     }
+
     protected void DeleteChildren(Transform parent)
     {
       for (int i = parent.childCount - 1; i >= 0; i--)
@@ -224,6 +226,7 @@ namespace KerboKatz
         Destroy(parent.GetChild(i).gameObject);
       }
     }
+
     protected void DeleteChildren(Transform parent, string nameMatch)
     {
       for (int i = parent.childCount - 1; i >= 0; i--)
@@ -235,6 +238,7 @@ namespace KerboKatz
         }
       }
     }
+
     protected C GetComponentInChild<C>(Transform content, string childName) where C : Component
     {
       if (content == null)
@@ -270,6 +274,7 @@ namespace KerboKatz
       return component;
       //content.FindChild(childName).GetComponentInChildren<Text>();
     }
+
     protected Text InitTextField(Transform content, string childName, string initStatus)
     {
       var uiObject = GetComponentInChild<Text>(content, childName);
@@ -280,6 +285,7 @@ namespace KerboKatz
       uiObject.text = initStatus;
       return uiObject;
     }
+
     protected Toggle InitToggle(Transform content, string childName, bool initStatus, UnityAction<bool> eventListener = null, bool removeAllListeners = false)
     {
       var uiObject = GetComponentInChild<Toggle>(content, childName);
@@ -294,6 +300,7 @@ namespace KerboKatz
         uiObject.onValueChanged.AddListener(eventListener);
       return uiObject;
     }
+
     protected InputField InitInputField(Transform content, string childName, string initStatus, UnityAction<string> eventListener = null, bool removeAllListeners = false)
     {
       var uiObject = GetComponentInChild<InputField>(content, childName);
@@ -308,7 +315,8 @@ namespace KerboKatz
       uiObject.text = initStatus;
       return uiObject;
     }
-    protected Dropdown InitDropdown(Transform content, string childName, UnityAction<int> eventListener = null, List<string> initOptions = null, bool removeAllListeners = false)
+
+    protected Dropdown InitDropdown(Transform content, string childName, UnityAction<int> eventListener = null, int selectedOption = 0, List<string> initOptions = null, bool removeAllListeners = false)
     {
       var uiObject = GetComponentInChild<Dropdown>(content, childName);
       if (uiObject == null)
@@ -319,17 +327,17 @@ namespace KerboKatz
         uiObject.onValueChanged.RemoveAllListeners();
       if (eventListener != null)
         uiObject.onValueChanged.AddListener(eventListener);
-      uiObject.value = 0;
+      uiObject.value = selectedOption;
       if (initOptions != null)
       {
         AddOptionsToDropdown(initOptions, uiObject);
       }
-      var stockCanvas = UIMasterController.Instance.appCanvas;
       //fix dropdown sorting layer
-      GetComponentInChild<Canvas>(uiObject.transform, "Template").sortingLayerID = UIMasterController.Instance.appCanvas.sortingLayerID;
+      GetComponentInChild<Canvas>(uiObject.transform, "Template").sortingLayerID = CanvasController.instance.canvas.sortingLayerID;
 
       return uiObject;
     }
+
     protected Slider InitSlider(Transform content, string childName, float initStatus, UnityAction<float> eventListener = null, bool removeAllListeners = false)
     {
       var uiObject = GetComponentInChild<Slider>(content, childName);
@@ -344,6 +352,7 @@ namespace KerboKatz
       uiObject.value = initStatus;
       return uiObject;
     }
+
     protected Button InitButton(Transform content, string childName, UnityAction eventListener = null, bool removeAllListeners = false)
     {
       var uiObject = GetComponentInChild<Button>(content, childName);
@@ -357,6 +366,7 @@ namespace KerboKatz
         uiObject.onClick.AddListener(eventListener);
       return uiObject;
     }
+
     protected Image InitImage(Transform content, string childName, Texture2D spriteImage)
     {
       if (spriteImage == null)
@@ -364,8 +374,14 @@ namespace KerboKatz
         Log("Texture2D is null!");
         return null;
       }
-      return InitImage(content, childName, Sprite.Create(spriteImage, new Rect(Vector2.zero, new Vector2(spriteImage.width, spriteImage.height)), new Vector2(0.5f, 0.5f)));
+      return InitImage(content, childName, GetSprite(spriteImage));
     }
+
+    protected static Sprite GetSprite(Texture2D newIcon)
+    {
+      return Sprite.Create(newIcon, new Rect(Vector2.zero, new Vector2(newIcon.width, newIcon.height)), new Vector2(0.5f, 0.5f));
+    }
+
     protected Image InitImage(Transform content, string childName, Sprite spriteImage)
     {
       if (spriteImage == null)
@@ -394,6 +410,7 @@ namespace KerboKatz
     {
       uiObject.options.Add(new Dropdown.OptionData(option));
     }
+
     public void FadeCanvasGroup(CanvasGroup fadeCanvasGroup, float alpha, float speed, Action callback = null)
     {
       var newRoutine = StartCoroutine(FadeUI.FadeTo(fadeCanvasGroup, alpha, speed, callback));
@@ -409,6 +426,7 @@ namespace KerboKatz
         fadeCoroutines.Add(fadeCanvasGroup, newRoutine);
       }
     }
+
     public void FadeGraphic(Graphic uiObject, bool status)
     {
       Coroutine coroutine, newCoroutine;
@@ -435,6 +453,7 @@ namespace KerboKatz
         fadeCoroutines.Add(uiObject, coroutine);
       }
     }
-    #endregion
+
+    #endregion UI
   }
 }

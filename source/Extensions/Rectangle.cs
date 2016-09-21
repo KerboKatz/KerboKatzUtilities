@@ -15,6 +15,7 @@ namespace KerboKatz.Extensions
     public Rect rect;
     public updateType UpdatePosition;
     public bool isLocking = false;
+
     public Rectangle()
     {
       init();

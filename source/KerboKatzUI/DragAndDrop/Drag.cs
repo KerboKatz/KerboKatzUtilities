@@ -39,7 +39,7 @@ namespace KerboKatz.UI
         var dropedOn = droped.GetComponent<Drop>();
         if (dropedOn != null)
         {
-          dropedOn.OnObjectDroped.Invoke(transform);
+          dropedOn.onObjectDroped.Invoke(transform);
           break;
         }
       }
