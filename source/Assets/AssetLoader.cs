@@ -137,6 +137,7 @@ namespace KerboKatz.Assets
 
     public IEnumerator LoadBundle(string path)
     {
+      var fromCache = false;
       var dataPath = GetPath(path);
 
       Log("Path is: ", dataPath, " File exists: ", File.Exists(dataPath), " Path is: ", dataPath);
@@ -154,11 +155,19 @@ namespace KerboKatz.Assets
 
         if (bundle == null)
         {
-          Log("GetBundle returns null. ", dataPath);
-          yield break;
+          Log("LoadFromFileAsync returns null. ", dataPath);
+          if (!CheckBundle(dataPath, out bundle))
+          {
+            Log("Checked bundle. It is nulll!", dataPath);
+            yield break;
+          }
+          Log("Cache hit! Must have loaded it with magic!", dataPath);
+          fromCache = true;
         }
         Log("Loaded bundle at ", dataPath);
-        cachedAssetBundles.Add(dataPath, bundle);
+
+        if(!fromCache)
+          cachedAssetBundles.Add(dataPath, bundle);
       }
       var list = pathsToLoad.TryGetOrAdd(path);
       foreach (var loaderInfo in list)

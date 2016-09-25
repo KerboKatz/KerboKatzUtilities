@@ -73,6 +73,7 @@ namespace KerboKatz
 
     protected virtual void OnDestroy()
     {
+      Log("OnDestroy");
       BeforeSaveOnDestroy();
 
       if (settings != null)
