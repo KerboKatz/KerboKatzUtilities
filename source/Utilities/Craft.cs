@@ -175,14 +175,15 @@ namespace KerboKatz
       private static bool GetPartCost(ConfigNode part, out float total, bool includeFuel = true)
       {
         string name = GetPartName(part);
-        float dryCost, fuelCost;
+        float dryCost, fuelCost, mass;
         total = 0;
         var aP = GetAvailablePart(name);
         if (aP == null)
         {
           return false;
         }
-        total = ShipConstruction.GetPartCosts(part, aP, out dryCost, out fuelCost);
+        //ShipConstruction.GetPartCostsAndMass
+        total = ShipConstruction.GetPartCostsAndMass(part, aP, out dryCost, out fuelCost, out mass, out mass);
         if (!includeFuel)
           total = dryCost;
         return ResearchAndDevelopment.PartTechAvailable(aP);

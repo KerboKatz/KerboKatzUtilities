@@ -13,8 +13,9 @@ namespace KerboKatz.Assets
   {
     private static Dictionary<string, List<LoaderInfo>> pathsToLoad = new Dictionary<string, List<LoaderInfo>>();
     private static Dictionary<string, AssetBundle> cachedAssetBundles = new Dictionary<string, AssetBundle>();
-    private HashSet<string> isRuning = new HashSet<string>();
+    private static HashSet<string> isRuning = new HashSet<string>();
     private static EmptySettings staticSettings;
+    private static AssetLoader instance;
 
     public AssetLoader()
     {
@@ -24,32 +25,10 @@ namespace KerboKatz.Assets
 
     public override void OnAwake()
     {
+      instance = this;
       DontDestroyOnLoad(this);
       LoadSettings("", "AssetLoadSettings");
       staticSettings = settings;
-    }
-
-    public static LoaderInfo Add(string path, string objectName, Action<GameObject> onAssetLoaded)
-    {
-      GetBundle("kerbokatz");
-      var dataPath = GetPath(path);
-      path = GetWWWPath(dataPath);
-      var loaderInfo = new LoaderInfo();
-      loaderInfo.path = path;
-      loaderInfo.objectName = objectName;
-      loaderInfo.onAssetLoaded = onAssetLoaded;
-      AssetBundle bundle;
-
-      if (!CheckBundle(path, out bundle))
-      {
-        var list = pathsToLoad.TryGetOrAdd(path);
-        list.Add(loaderInfo);
-      }
-      else
-      {
-        SetLoaderReady(loaderInfo, bundle);
-      }
-      return loaderInfo;
     }
 
     public static T GetAsset<T>(string name, string pathInBundle = "", string bundlePath = "kerbokatz", string dataType = "png") where T : UnityEngine.Object
@@ -78,14 +57,17 @@ namespace KerboKatz.Assets
     private static AssetBundle GetBundle(string bundlePath)
     {
       var dataPath = GetPath(bundlePath);
-      var wwwPath = GetWWWPath(dataPath);
-      Log("Path is: ", dataPath, " File exists: ", File.Exists(dataPath), " WWWPath is: ", wwwPath);
+      Log("Path is: ", dataPath, " File exists: ", File.Exists(dataPath), " Path is: ", dataPath);
       AssetBundle bundle;
-      if (!CheckBundle(wwwPath, out bundle))
+      if (!CheckBundle(dataPath, out bundle))
       {//when kerbal upgrades to unity 5.3 or higher this will be replaced by AssetBundle.LoadFromFile which can load compressed assetbundles as well
-        Log("Couldn't find bundle. Loading from file!");
-        bundle = AssetBundle.CreateFromFile(dataPath);
-        cachedAssetBundles.Add(wwwPath, bundle);
+        Log("Couldn't find bundle. Loading from file!", dataPath);
+        bundle = AssetBundle.LoadFromFile(dataPath);
+        if (bundle == null)
+        {
+          Log("GetBundle returns null. ", dataPath);
+        }
+        cachedAssetBundles.Add(dataPath, bundle);
       }
 
       return bundle;
@@ -102,63 +84,86 @@ namespace KerboKatz.Assets
       return path;
     }
 
-    private static string GetWWWPath(string dataPath)
+    private static bool CheckBundle(string dataPath, out AssetBundle bundle)
     {
-      return "file://" + dataPath;
-    }
-
-    private static bool CheckBundle(string wwwPath, out AssetBundle bundle)
-    {
-      var foundBundle = cachedAssetBundles.TryGetValue(wwwPath, out bundle);
+      var foundBundle = cachedAssetBundles.TryGetValue(dataPath, out bundle);
+      Log("FoundBundle: ", foundBundle, " is null: ", bundle == null, " ", dataPath);
       if (!foundBundle || bundle == null)
       {
         if (foundBundle)
         {
-          cachedAssetBundles.Remove(wwwPath);
-          Log("Bundle is null!");
+          cachedAssetBundles.Remove(dataPath);
+          Log("Bundle is null!Removing!");
         }
+        Log("Cache miss!");
         return false;
       }
+      Log("Cache hit!");
       return true;
     }
-
-    private void Update()
+    public static void Add(string path, string objectName, Action<GameObject> onAssetLoaded)
     {
-      foreach (var list in pathsToLoad)
+      GetBundle("kerbokatz");
+      var dataPath = GetPath(path);
+      var loaderInfo = new LoaderInfo();
+      loaderInfo.path = path;
+      loaderInfo.objectName = objectName;
+      loaderInfo.onAssetLoaded = onAssetLoaded;
+      AssetBundle bundle;
+
+      if (!CheckBundle(dataPath, out bundle))
       {
-        if (!isRuning.Contains(list.Key))
+        if (instance != null)
         {
-          StartCoroutine(LoadBundle(list.Key));
-          isRuning.Add(list.Key);
+          instance.StartCoroutineForBundle(path);
+          pathsToLoad.TryGetOrAdd(path).Add(loaderInfo);
+          return;
+        }
+        else
+        {
+          bundle = GetBundle(path);
         }
       }
+      SetLoaderReady(loaderInfo, bundle);
+    }
+
+    private void StartCoroutineForBundle(string dataPath)
+    {
+      if (isRuning.Contains(dataPath))
+        return;
+      StartCoroutine(LoadBundle(dataPath));
+      isRuning.Add(dataPath);
     }
 
     public IEnumerator LoadBundle(string path)
     {
-      using (WWW www = new WWW(path))
-      {
-        yield return www;
-        AssetBundle assetBundle;
-        if (!CheckBundle(path, out assetBundle))
-        {
-          assetBundle = www.assetBundle;
+      var dataPath = GetPath(path);
 
-          if (assetBundle == null)
-          {
-            isRuning.Remove(path);
-            Log("Bundle loaded as null!: ", path);
-            yield break;
-          }
-          cachedAssetBundles.Add(path, assetBundle);
-        }
-        var list = pathsToLoad.TryGetOrAdd(path);
-        foreach (var loaderInfo in list)
-        {
-          SetLoaderReady(loaderInfo, assetBundle);
-        }
-        pathsToLoad.Remove(path);
+      Log("Path is: ", dataPath, " File exists: ", File.Exists(dataPath), " Path is: ", dataPath);
+
+      AssetBundle bundle;
+      if (!CheckBundle(dataPath, out bundle))
+      {
+        Log("Couldn't find bundle. Loading from file!", dataPath);
+        var bundleLoader = AssetBundle.LoadFromFileAsync(dataPath);
+        yield return bundleLoader;
+
         isRuning.Remove(path);
+
+        bundle = bundleLoader.assetBundle;
+
+        if (bundle == null)
+        {
+          Log("GetBundle returns null. ", dataPath);
+          yield break;
+        }
+        Log("Loaded bundle at ", dataPath);
+        cachedAssetBundles.Add(dataPath, bundle);
+      }
+      var list = pathsToLoad.TryGetOrAdd(path);
+      foreach (var loaderInfo in list)
+      {
+        SetLoaderReady(loaderInfo, bundle);
       }
     }
 
