@@ -33,6 +33,15 @@ namespace KerboKatz.Toolbar
     {
       instance = this;
       DontDestroyOnLoad(this);
+      GameEvents.onGUIApplicationLauncherDestroyed.Add(OnGuiAppLauncherDestroy);
+      //AddToLauncher();
+      GameEvents.onGameSceneLoadRequested.Add(OnGameSceneLoadRequested);
+      LoadSettings("", "ToolbarSettings");
+      LoadUI(toolbarUIName);
+    }
+
+    private void AddToLauncher()
+    {
       if (!ApplicationLauncher.Ready)
       {
         GameEvents.onGUIApplicationLauncherReady.Add(OnGuiAppLauncherReady);
@@ -41,9 +50,6 @@ namespace KerboKatz.Toolbar
       {
         OnGuiAppLauncherReady();
       }
-      GameEvents.onGameSceneLoadRequested.Add(OnGameSceneLoadRequested);
-      LoadSettings("", "ToolbarSettings");
-      LoadUI(toolbarUIName);
     }
 
     private void OnGameSceneLoadRequested(GameScenes newScene)
@@ -57,6 +63,14 @@ namespace KerboKatz.Toolbar
     {
       GameEvents.onGameSceneLoadRequested.Remove(OnGameSceneLoadRequested);
       GameEvents.onGUIApplicationLauncherReady.Remove(OnGuiAppLauncherReady);
+    }
+    public void OnGuiAppLauncherDestroy()
+    {
+      if (button != null)
+      {
+        ApplicationLauncher.Instance.RemoveModApplication(button);
+        button = null;
+      }
     }
 
     private void OnGuiAppLauncherReady()
@@ -73,7 +87,8 @@ namespace KerboKatz.Toolbar
             null, //RUIToggleButton.onHoverOut
             null, //RUIToggleButton.onEnable
             null, //RUIToggleButton.onDisable
-            scences, //visibleInScenes
+            ApplicationLauncher.AppScenes.ALWAYS,
+            //scences, //visibleInScenes
             texture//texture
         );
         button.onRightClick = OnToolbar;
@@ -132,7 +147,7 @@ namespace KerboKatz.Toolbar
     private void Update()
     {
       var mainUIWindow = GetUIData(toolbarUIName);
-      if (button == null || mainUIWindow == null || mainUIWindow.gameObject == null)
+      if (/*button == null || */mainUIWindow == null || mainUIWindow.gameObject == null)
       {
         return;
       }
@@ -150,11 +165,13 @@ namespace KerboKatz.Toolbar
             FadeCanvasGroup(mainUIWindow.canvasGroup, 0, settings.uiFadeSpeed);
             settings.showToolbar = false;
           }
-          button.VisibleInScenes = ApplicationLauncher.AppScenes.ALWAYS;
+          AddToLauncher();
+          //button.VisibleInScenes = ApplicationLauncher.AppScenes.ALWAYS;
         }
         else
         {
-          button.VisibleInScenes = ApplicationLauncher.AppScenes.NEVER;
+          OnGuiAppLauncherDestroy();
+          //button.VisibleInScenes = ApplicationLauncher.AppScenes.NEVER;
         }
         isUpdateRequired = false;
       }
