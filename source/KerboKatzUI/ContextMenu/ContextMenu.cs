@@ -17,17 +17,18 @@ namespace KerboKatz.UI
     private bool showContextMenu;
     private bool isDirty;
     private readonly static Vector3 offScreen = new Vector3(100000, 100000);
-
+    private static GameObject coroutineGameObject = null;
     private void OnEnable()
     {
-      StartCoroutine(GetReady());
+      CoroutineManager.instance.StartCoroutine(GetReady());
     }
     IEnumerator GetReady()
     {
       while (canvas == null)
       {
         canvas = GetComponentInParent<Canvas>();
-        yield return null;
+        if (canvas == null)
+          yield return null;
       }
       if (prefabCopy == null)
       {
@@ -43,6 +44,7 @@ namespace KerboKatz.UI
           AddOption(option);
         }
       }
+      prefabCopy.SetActive(showContextMenu);
     }
 
     public void Init()
