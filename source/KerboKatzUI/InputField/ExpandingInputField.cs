@@ -37,7 +37,7 @@ namespace KerboKatz.UI
 
     protected override void Start()
     {
-      inputField.onValueChange.AddListener(new UnityEngine.Events.UnityAction<string>(ResizeInput));
+      inputField.onValueChanged.AddListener(new UnityEngine.Events.UnityAction<string>(ResizeInput));
       ResizeInput(inputField.text);
     }
 

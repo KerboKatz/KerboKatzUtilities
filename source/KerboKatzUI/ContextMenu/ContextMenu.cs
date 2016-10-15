@@ -20,8 +20,15 @@ namespace KerboKatz.UI
 
     private void OnEnable()
     {
-      if (canvas == null)
+      StartCoroutine(GetReady());
+    }
+    IEnumerator GetReady()
+    {
+      while (canvas == null)
+      {
         canvas = GetComponentInParent<Canvas>();
+        yield return null;
+      }
       if (prefabCopy == null)
       {
         prefabCopy = Instantiate(prefab);

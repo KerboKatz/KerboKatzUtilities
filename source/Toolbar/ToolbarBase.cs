@@ -244,6 +244,9 @@ namespace KerboKatz.Toolbar
       {
         if (isVisible(currentMod))
         {
+          if (modImages.ContainsKey(currentMod.modName))
+            continue;
+          Log("isVisible: ", currentMod.modName);
           var newToolbarOption = Instantiate(template.gameObject);
           newToolbarOption.SetActive(true);
           newToolbarOption.transform.SetParent(content, false);
