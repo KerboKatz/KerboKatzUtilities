@@ -16,11 +16,14 @@ namespace KerboKatz.Toolbar
 
     private HashSet<IToolbar> modules = new HashSet<IToolbar>();
     private List<IToolbar> visibleInThisScene = new List<IToolbar>();
+    private Dictionary<IToolbar, GameObject> visibleKKToolbar = new Dictionary<IToolbar, GameObject>();
     private bool isUpdateRequired;
     private Transform content;
     private Transform template;
     private string toolbarUIName;
     private Dictionary<string, Image> modImages = new Dictionary<string, Image>();
+    private UIData mainUIWindow;
+    private Dictionary<IToolbar, ApplicationLauncherButton> modButtons = new Dictionary<IToolbar, ApplicationLauncherButton>();
 
     public ToolbarBase()
     {
@@ -38,6 +41,11 @@ namespace KerboKatz.Toolbar
       GameEvents.onGameSceneLoadRequested.Add(OnGameSceneLoadRequested);
       LoadSettings("", "ToolbarSettings");
       LoadUI(toolbarUIName);
+    }
+    public static void SetDirty()
+    {
+      if (instance != null)
+        instance.isUpdateRequired = true;
     }
 
     private void AddToLauncher()
@@ -63,6 +71,10 @@ namespace KerboKatz.Toolbar
     {
       GameEvents.onGameSceneLoadRequested.Remove(OnGameSceneLoadRequested);
       GameEvents.onGUIApplicationLauncherReady.Remove(OnGuiAppLauncherReady);
+      foreach (var mod in modButtons)
+      {
+        ApplicationLauncher.Instance.RemoveModApplication(mod.Value);
+      }
     }
     public void OnGuiAppLauncherDestroy()
     {
@@ -70,6 +82,10 @@ namespace KerboKatz.Toolbar
       {
         ApplicationLauncher.Instance.RemoveModApplication(button);
         button = null;
+      }
+      foreach (var mod in modButtons)
+      {
+        ApplicationLauncher.Instance.RemoveModApplication(mod.Value);
       }
     }
 
@@ -111,9 +127,10 @@ namespace KerboKatz.Toolbar
 
     private void OnToolbar()
     {
-      if (visibleInThisScene.Count == 1)
+      if (visibleKKToolbar.Count == 1)
       {
-        visibleInThisScene[0].onClick();
+        //visibleInThisScene[0].onClick();
+        GetKKToolbarItem().onClick();
       }
       else
       {
@@ -131,6 +148,15 @@ namespace KerboKatz.Toolbar
       }
     }
 
+    private IToolbar GetKKToolbarItem()
+    {
+      foreach (var mod in visibleKKToolbar)
+      {
+        return mod.Key;
+      }
+      return null;
+    }
+
     public void Add(IToolbar data)
     {
       Log("ToolbarBase: Adding ", data.GetType());
@@ -146,9 +172,9 @@ namespace KerboKatz.Toolbar
 
     private void Update()
     {
-      var mainUIWindow = GetUIData(toolbarUIName);
       if (/*button == null || */mainUIWindow == null || mainUIWindow.gameObject == null)
       {
+        mainUIWindow = GetUIData(toolbarUIName);
         return;
       }
       if (isUpdateRequired)
@@ -179,9 +205,9 @@ namespace KerboKatz.Toolbar
 
     public static bool UpdateIcon(bool updateAll = true)
     {
-      if (instance.visibleInThisScene.Count == 1)
+      if (instance.visibleKKToolbar.Count == 1)
       {
-        instance.SetIcon(instance.visibleInThisScene[0].icon);
+        instance.SetIcon(instance.GetKKToolbarItem().icon);
         return true;
       }
       else if (updateAll)
@@ -191,22 +217,26 @@ namespace KerboKatz.Toolbar
       return false;
     }
 
-    public static void UpdateIcon(string modName, Texture2D newIcon)
+    public static void UpdateIcon(IToolbar mod, Texture2D newIcon)
     {
-      UpdateIcon(modName, GetSprite(newIcon));
+      UpdateIcon(mod, GetSprite(newIcon));
     }
 
-    public static void UpdateIcon(string modName, Sprite newIcon)
+    public static void UpdateIcon(IToolbar mod, Sprite newIcon)
     {
       Image imageObj;
-      if (instance.modImages.TryGetValue(modName, out imageObj))
+      if (instance.modImages.TryGetValue(mod.modName, out imageObj))
       {
         imageObj.sprite = newIcon;
       }
-
-      if (instance.visibleInThisScene.Count == 1)
+      ApplicationLauncherButton button = null;
+      if (instance.visibleKKToolbar.Count == 1 && instance.visibleKKToolbar.ContainsKey(mod))
       {
-        instance.SetIcon(instance.visibleInThisScene[0].icon);
+        instance.SetIcon(instance.GetKKToolbarItem().icon);
+      }
+      else if (instance.modButtons.TryGetValue(mod,out button))
+      {
+        button.SetTexture(newIcon.texture);
       }
     }
 
@@ -237,8 +267,14 @@ namespace KerboKatz.Toolbar
 
     private void UpdateVisibleList()
     {
+      visibleKKToolbar.Clear();
       visibleInThisScene.Clear();
       modImages.Clear();
+      foreach (var mod in modButtons)
+      {
+        ApplicationLauncher.Instance.RemoveModApplication(mod.Value);
+      }
+      modButtons.Clear();
       DeleteChildren(content);
       foreach (var currentMod in modules)
       {
@@ -248,7 +284,6 @@ namespace KerboKatz.Toolbar
             continue;
           Log("isVisible: ", currentMod.modName);
           var newToolbarOption = Instantiate(template.gameObject);
-          newToolbarOption.SetActive(true);
           newToolbarOption.transform.SetParent(content, false);
           newToolbarOption.transform.FindChild("Text").GetComponent<Text>().text = currentMod.displayName;
           var image = InitImage(newToolbarOption.transform, "Image", currentMod.icon);
@@ -257,6 +292,36 @@ namespace KerboKatz.Toolbar
 
           newToolbarOption.GetComponent<Button>().onClick.AddListener(currentMod.onClick);
           visibleInThisScene.Add(currentMod);
+          if (currentMod.useKKToolbar)
+          {
+            newToolbarOption.SetActive(true);
+            visibleKKToolbar.Add(currentMod, newToolbarOption);
+          }
+          else
+          {
+            Callback OnToolbar = () =>
+            {
+              currentMod.onClick();
+            };
+            icon = image.sprite;
+            Texture2D texture = null;
+            if (icon != null)
+              texture = icon.texture;
+            var button = ApplicationLauncher.Instance.AddModApplication(
+                OnToolbar,  //RUIToggleButton.onTrue
+                OnToolbar,  //RUIToggleButton.onFalse
+                null, //RUIToggleButton.OnHover
+                null, //RUIToggleButton.onHoverOut
+                null, //RUIToggleButton.onEnable
+                null, //RUIToggleButton.onDisable
+                ApplicationLauncher.AppScenes.ALWAYS,
+                //scences, //visibleInScenes
+                texture//texture
+            );
+            button.onRightClick = OnToolbar;
+
+            modButtons.Add(currentMod, button);
+          }
         }
       }
     }

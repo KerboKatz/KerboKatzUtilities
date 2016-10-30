@@ -10,6 +10,7 @@ namespace KerboKatz.Toolbar
     string displayName { get; }
     string tooltip { get; }
     List<GameScenes> activeScences { get; }
+    bool useKKToolbar { get; }
     Sprite icon { get; }
     UnityAction onClick { get; }
   }
