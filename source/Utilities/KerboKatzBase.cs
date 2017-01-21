@@ -328,11 +328,11 @@ namespace KerboKatz
         uiObject.onValueChanged.RemoveAllListeners();
       if (eventListener != null)
         uiObject.onValueChanged.AddListener(eventListener);
-      uiObject.value = selectedOption;
       if (initOptions != null)
       {
         AddOptionsToDropdown(initOptions, uiObject);
       }
+      uiObject.value = selectedOption;
       //fix dropdown sorting layer
       GetComponentInChild<Canvas>(uiObject.transform, "Template").sortingLayerID = CanvasController.instance.canvas.sortingLayerID;
 
