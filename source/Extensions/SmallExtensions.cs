@@ -1,5 +1,6 @@
 ﻿using KerboKatz.Classes;
 using KSP.UI.Screens;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -9,6 +10,50 @@ namespace KerboKatz
 {
   public static partial class SmallExtensions
   {
+    public static bool IsTypeOf(this Type type, Type typeOf)
+    {
+      if (type == typeOf)
+        return true;
+      return type.IsClass && !type.IsAbstract && type.IsSubclassOf(typeOf);
+    }
+    public static bool HasData(this IScienceDataContainer container, ScienceData data)
+    {
+      var dataStore = container.GetData(); ;
+      var scienceCount = dataStore.Length;
+      for (var i = 0; i < scienceCount; i++)
+      {
+        if (dataStore[i].subjectID == data.subjectID)
+        {
+          return true;
+        }
+      }
+      return false;
+    }
+    public static void StoreData(this IScienceDataContainer container, ModuleScienceExperiment experiment, bool dumpDuplicates)
+    {
+      if (container == experiment as IScienceDataContainer)
+      {
+        ScreenMessages.PostScreenMessage("Container is the same as experiment!", 1f, ScreenMessageStyle.UPPER_LEFT);
+        return;
+      }
+      var containerData = container.GetData();
+      var experimentData = experiment.GetData();
+      for (var i = 0; i < experimentData.Length; i++)
+      {
+        if (!container.HasData(experimentData[i]))
+        {
+          container.ReturnData(experimentData[i]);
+          if (container.HasData(experimentData[i]))
+            experiment.DumpData(experimentData[i]);
+          else
+            ScreenMessages.PostScreenMessage("Container didnt store the experiment", 1f, ScreenMessageStyle.UPPER_LEFT);
+        }
+        else if (dumpDuplicates)
+        {
+          experiment.DumpData(experimentData[i]);
+        }
+      }
+    }
     public static string NormalizePath(this DirectoryInfo path)
     {
       return path.FullName.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
@@ -74,7 +119,7 @@ namespace KerboKatz
       }
       return current;
     }
-
+    /*
     private static Dictionary<KeyBinding, KeyBindingStorage> KeyBindingStorage = new Dictionary<KeyBinding, KeyBindingStorage>();
 
     public static void saveDefault(this KeyBinding KeyBinding)
@@ -128,6 +173,6 @@ namespace KerboKatz
         AxisBinding.primary.scale = AxisBindingStorage[AxisBinding].primaryScale;
         AxisBinding.secondary.scale = AxisBindingStorage[AxisBinding].secondaryScale;
       }
-    }
+    }*/
   }
 }
