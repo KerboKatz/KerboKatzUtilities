@@ -29,7 +29,7 @@ namespace KerboKatz
       }
       return false;
     }
-    public static void StoreData(this IScienceDataContainer container, ModuleScienceExperiment experiment, bool dumpDuplicates)
+    public static void StoreData(this IScienceDataContainer container, IScienceDataContainer experiment, bool dumpDuplicates)
     {
       if (container == experiment as IScienceDataContainer)
       {
