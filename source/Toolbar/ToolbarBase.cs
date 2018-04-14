@@ -12,7 +12,7 @@ namespace KerboKatz.Toolbar
   {
     public static ToolbarBase instance;
     private ApplicationLauncherButton button;
-    private ApplicationLauncher.AppScenes scences = ApplicationLauncher.AppScenes.NEVER;
+    //private ApplicationLauncher.AppScenes scences = ApplicationLauncher.AppScenes.NEVER;
     private Sprite icon = new Sprite();
 
     private HashSet<IToolbar> modules = new HashSet<IToolbar>();
@@ -118,8 +118,8 @@ namespace KerboKatz.Toolbar
     protected override void OnUIElemntInit(UIData uiWindow)
     {
       var prefabWindow = uiWindow.gameObject.transform as RectTransform;
-      content = prefabWindow.FindChild("Content");
-      template = content.FindChild("Template");
+      content = prefabWindow.Find("Content");
+      template = content.Find("Template");
       template.SetParent(prefabWindow);
       template.gameObject.SetActive(false);
     }
@@ -249,7 +249,7 @@ namespace KerboKatz.Toolbar
         if (isVisible(currentMod))
         {
           var current = content.GetChild(i);
-          var icon = current.FindChild("Image");
+          var icon = current.Find("Image");
           icon.GetComponent<Image>().sprite = currentMod.icon;//Sprite.Create(currentMod.icon, new Rect(Vector2.zero, new Vector2(38, 38)), new Vector2(0.5f, 0.5f));
           i++;
         }
@@ -286,7 +286,7 @@ namespace KerboKatz.Toolbar
           Log("isVisible: ", currentMod.modName);
           var newToolbarOption = Instantiate(template.gameObject);
           newToolbarOption.transform.SetParent(content, false);
-          newToolbarOption.transform.FindChild("Text").GetComponent<Text>().text = currentMod.displayName;
+          newToolbarOption.transform.Find("Text").GetComponent<Text>().text = currentMod.displayName;
           var image = InitImage(newToolbarOption.transform, "Image", currentMod.icon);
           modImages.Add(currentMod.modName, image);
           //newToolbarOption.transform.FindChild("Image").GetComponent<Image>().sprite = Sprite.Create(currentMod.icon, new Rect(Vector2.zero, new Vector2(38, 38)), new Vector2(0.5f, 0.5f));

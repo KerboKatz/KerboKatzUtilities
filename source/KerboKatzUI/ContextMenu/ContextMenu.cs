@@ -17,7 +17,7 @@ namespace KerboKatz.UI
     private bool showContextMenu;
     private bool isDirty;
     private readonly static Vector3 offScreen = new Vector3(100000, 100000);
-    private static GameObject coroutineGameObject = null;
+    //private static GameObject coroutineGameObject = null;
     private void OnEnable()
     {
       CoroutineManager.instance.StartCoroutine(GetReady());
@@ -37,7 +37,7 @@ namespace KerboKatz.UI
       }
       if (template == null)
       {
-        template = prefabCopy.transform.FindChild("Template").gameObject;
+        template = prefabCopy.transform.Find("Template").gameObject;
         template.SetActive(false);
         foreach (var option in options)
         {

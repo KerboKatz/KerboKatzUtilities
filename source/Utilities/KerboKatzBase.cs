@@ -247,7 +247,7 @@ namespace KerboKatz
         Log("Transform is null!");
         return null;
       }
-      var child = content.FindChild(childName);
+      var child = content.Find(childName);
       if (child == null)
       {
         Log(content.name, ": child(", childName, ") is null!");
